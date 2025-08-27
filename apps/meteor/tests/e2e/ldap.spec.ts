@@ -4,6 +4,7 @@ import * as constants from './config/constants';
 import { provideContainerFor } from './containers/provideContainer';
 import { Users } from './fixtures/userStates';
 import { Registration } from './page-objects';
+import { getUserInfo } from './utils/getUserInfo';
 import { setSettingValueById } from './utils/setSettingValueById';
 import { test, expect } from './utils/test';
 
@@ -19,6 +20,14 @@ const resetTestData = async () => {
 				$in: usernamesToDelete,
 			},
 		});
+
+	// Also clear any LDAP-related users that might exist
+	await connection
+		.db()
+		.collection('users')
+		.deleteMany({
+			'services.ldap': { $exists: true },
+		});
 };
 
 test.describe('LDAP', () => {
@@ -27,7 +36,7 @@ test.describe('LDAP', () => {
 	test.beforeAll(async ({ api }) => {
 		await resetTestData();
 
-		// The params for the LDAP integration have been injected by the initial script, we only enable it by API
+		// The LDAP settings are injected by the Playwright global setup; the suite only enables the feature.
 		expect((await setSettingValueById(api, 'LDAP_Enable', true)).status()).toBe(200);
 
 		await container.startUp();
@@ -35,26 +44,52 @@ test.describe('LDAP', () => {
 
 	test.afterAll(async () => {
 		await container.cleanUp();
-
-		// Remove ldap test users so they don't interfere with other tests
 		await resetTestData();
 	});
 
 	test('Connection Test', async ({ api }) => {
 		await test.step('Expect to successfully execute a connection test', async () => {
-			expect((await api.post('/ldap.testConnection', {})).status()).toBe(200);
+			const response = await api.post('/ldap.testConnection', {});
+			expect(response.status()).toBe(200);
+			const result = await response.json();
+			expect(result.success).toBe(true);
 		});
 	});
 
-	test('Login using LDAP credentials', async ({ page }) => {
-		const poRegistration = new Registration(page);
+	test('User Search Test', async ({ api }) => {
+		await test.step('Expect to successfully search for LDAP users', async () => {
+			const response = await api.post('/ldap.testSearch', {
+				username: 'alan.bean',
+			});
+			expect(response.status()).toBe(200);
+			const result = await response.json();
+			expect(result.success).toBe(true);
+		});
+	});
 
+	test('Login using LDAP credentials', async ({ page, api }) => {
+		const poRegistration = new Registration(page);
 		await page.goto('/home');
 
-		await poRegistration.username.type('alan.bean');
-		await poRegistration.inputPassword.type('ldappassword');
-		await poRegistration.btnLogin.click();
+		await test.step('Expect to be able to login with LDAP credentials', async () => {
+			await expect(poRegistration.username).toBeVisible({ timeout: 10000 });
+			await expect(poRegistration.inputPassword).toBeVisible({ timeout: 10000 });
+			await poRegistration.username.fill('alan.bean');
+			await poRegistration.inputPassword.fill('ldappassword');
+			await poRegistration.btnLogin.click();
 
-		await expect(page.locator('role=heading[name="Welcome to Rocket.Chat"]')).toBeVisible();
+			await expect(page).toHaveURL('/home');
+			await expect(page.getByRole('button', { name: 'User menu' })).toBeVisible();
+		});
+
+		await test.step('Expect LDAP user data to have been mapped to the correct fields', async () => {
+			const user = await getUserInfo(api, 'alan.bean');
+
+			expect(user).toBeDefined();
+			expect(user?.username).toBe('alan.bean');
+			expect(user?.name).toBe('Alan Bean');
+			expect(user?.emails).toBeDefined();
+			expect(user?.emails?.[0].address).toBe('alan.bean@space.air');
+		});
 	});
 });

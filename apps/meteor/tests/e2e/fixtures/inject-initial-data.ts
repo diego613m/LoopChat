@@ -7,6 +7,7 @@ import { Users } from './userStates';
 
 export default async function injectInitialData() {
 	const connection = await MongoClient.connect(constants.URL_MONGODB);
+	const ldapHost = process.env.CI ? 'host.docker.internal' : 'localhost';
 
 	const usersFixtures = [
 		createUserFixture(Users.user1),
@@ -72,6 +73,10 @@ export default async function injectInitialData() {
 				_id: 'Livechat_Require_Contact_Verification',
 				value: 'never',
 			},
+			{
+				_id: 'Accounts_ManuallyApproveNewUsers',
+				value: false,
+			},
 			{ _id: 'SAML_Custom_Default_role_attribute_name', value: 'role' },
 			{ _id: 'SAML_Custom_Default_provider', value: 'test-sp' },
 			{ _id: 'SAML_Custom_Default_issuer', value: 'http://localhost:3000/_saml/metadata/test-sp' },
@@ -80,12 +85,16 @@ export default async function injectInitialData() {
 			{ _id: 'SAML_Custom_Default_button_label_text', value: 'SAML test login button' },
 			{ _id: 'SAML_Custom_Default_button_color', value: '#185925' },
 			{ _id: 'LDAP_Server_Type', value: '' },
-			{ _id: 'LDAP_Host', value: 'localhost' },
+			{ _id: 'LDAP_Host', value: ldapHost },
 			{ _id: 'LDAP_Port', value: 1389 },
 			{ _id: 'LDAP_Authentication', value: true },
 			{ _id: 'LDAP_Authentication_UserDN', value: 'cn=admin,dc=space,dc=air' },
 			{ _id: 'LDAP_Authentication_Password', value: 'adminpassword' },
 			{ _id: 'LDAP_BaseDN', value: 'ou=users,dc=space,dc=air' },
+			{ _id: 'LDAP_User_Search_Field', value: 'uid' },
+			{ _id: 'LDAP_Username_Field', value: 'uid' },
+			{ _id: 'LDAP_Email_Field', value: 'mail' },
+			{ _id: 'LDAP_Name_Field', value: 'cn' },
 			{ _id: 'LDAP_Sync_User_Active_State', value: 'none' },
 		].map((setting) =>
 			connection

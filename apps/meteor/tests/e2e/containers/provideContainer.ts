@@ -7,6 +7,7 @@ type ContainerData = {
 	containerName: string;
 	instanceName: string;
 	containerPath: string;
+	shouldBuild?: boolean;
 };
 
 const containerData = {
@@ -14,17 +15,23 @@ const containerData = {
 		containerName: 'saml',
 		instanceName: 'testsamlidp_idp',
 		containerPath: path.join(__dirname, 'saml'),
+		shouldBuild: true,
 	},
 	LDAP: {
 		containerName: 'ldap',
 		instanceName: 'test_openldap',
 		containerPath: path.join(__dirname, 'ldap'),
+		shouldBuild: false,
 	},
 } as const;
 
-export function provideContainer({ instanceName, containerName, containerPath }: ContainerData) {
+export function provideContainer({ instanceName, containerName, containerPath, shouldBuild = true }: ContainerData) {
 	const container = {
 		build: async () => {
+			if (!shouldBuild) {
+				return;
+			}
+
 			await compose.buildOne(instanceName, {
 				cwd: containerPath,
 			});
