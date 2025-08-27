@@ -31,6 +31,8 @@ const resetTestData = async () => {
 };
 
 test.describe('LDAP', () => {
+	test.skip(!constants.IS_EE, 'Enterprise Only');
+
 	const container = provideContainerFor('LDAP');
 
 	test.beforeAll(async ({ api }) => {
