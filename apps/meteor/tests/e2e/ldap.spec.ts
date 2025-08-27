@@ -28,6 +28,39 @@ const resetTestData = async () => {
 		.deleteMany({
 			'services.ldap': { $exists: true },
 		});
+<<<<<<< HEAD
+=======
+
+	if (cleanupOnly) {
+		return;
+	}
+
+	// In CI: Use container name for container-to-container communication
+	const ldapHost = process.env.CI ? 'testldap_idp' : 'localhost';
+
+	const settings = [
+		{ _id: 'Accounts_ManuallyApproveNewUsers', value: false },
+		{ _id: 'Show_Setup_Wizard', value: 'completed' },
+		{ _id: 'LDAP_Enable', value: true },
+		{ _id: 'LDAP_Host', value: ldapHost },
+		{ _id: 'LDAP_Authentication', value: true },
+		{ _id: 'LDAP_Authentication_UserDN', value: 'cn=admin,dc=rcldap,dc=com,dc=br' },
+		{ _id: 'LDAP_Authentication_Password', value: 'password' },
+		{ _id: 'LDAP_BaseDN', value: 'ou=people,dc=rcldap,dc=com,dc=br' },
+		{ _id: 'LDAP_User_Search_Field', value: 'uid' },
+		{ _id: 'LDAP_Username_Field', value: 'uid' },
+		{ _id: 'LDAP_Email_Field', value: 'mail' },
+		{ _id: 'LDAP_Name_Field', value: 'cn' },
+		{ _id: 'LDAP_Sync_User_Data', value: true },
+		{ _id: 'LDAP_Background_Sync', value: true },
+		{ _id: 'LDAP_Sync_User_Active_State', value: 'disable' },
+	];
+
+	await Promise.all(settings.map(({ _id, value }) => setSettingValueById(api, _id, value)));
+
+	// Wait a moment for settings to take effect
+	await new Promise((resolve) => setTimeout(resolve, 1000));
+>>>>>>> 46d05a12d1 (ci fix second try)
 };
 
 test.describe('LDAP', () => {
