@@ -1,5 +1,29 @@
+import type { Meteor } from 'meteor/meteor';
+
 declare module 'meteor/accounts-base' {
 	import type { Meteor } from 'meteor/meteor';
+	type UserToActivateOptions = {
+		name?: string;
+		email?: string;
+		reason?: string;
+	};
+
+	type UserActivatedOptions = {
+		active: boolean;
+		username?: string;
+		name: string;
+	};
+
+	interface EmailTemplates {
+		userToActivate: {
+			subject(options?: UserToActivateOptions): string;
+			html(options?: UserToActivateOptions): string;
+		};
+		userActivated: {
+			subject(options: UserActivatedOptions): string;
+			html(options: UserActivatedOptions): string;
+		};
+	}
 
 	namespace Accounts {
 		const storageLocation: Window['localStorage'];
@@ -19,7 +43,7 @@ declare module 'meteor/accounts-base' {
 
 		function _getLoginToken(connectionId: string): string | undefined;
 
-		function insertUserDoc(options: Record<string, any>, user: Record<string, any>): string;
+		function insertUserDoc(options: Record<string, any>, user: Partial<Meteor.User> & { globalRoles?: string[] }): Promise<string>;
 
 		function _generateStampedLoginToken(): { token: string; when: Date };
 
@@ -62,7 +86,8 @@ declare module 'meteor/accounts-base' {
 		interface AccountsServerOptions {
 			ambiguousErrorMessages?: boolean;
 			restrictCreationByEmailDomain?: string | (() => string);
-			forbidClientAccountCreation?: boolean | undefined;
+			forbidClientAccountCreation?: boolean;
+			loginExpirationInDays?: number;
 		}
 
 		export const _options: AccountsServerOptions;
@@ -80,6 +105,10 @@ declare module 'meteor/accounts-base' {
 
 		const connection: {
 			userId(): string | null;
+		};
+
+		const _defaultPublishFields: {
+			projection: Record<string, unknown>;
 		};
 	}
 }
