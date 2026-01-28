@@ -23,7 +23,7 @@ export type SettingValue =
 	| null;
 
 export interface ISettingSelectOption {
-	key: string | number;
+	key: string;
 	i18nLabel: string;
 }
 
