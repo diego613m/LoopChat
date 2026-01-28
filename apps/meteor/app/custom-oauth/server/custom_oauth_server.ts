@@ -8,6 +8,7 @@ import { Match, check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 import { OAuth } from 'meteor/oauth';
 import { ServiceConfiguration } from 'meteor/service-configuration';
+import type { ClientSession } from 'mongodb';
 import _ from 'underscore';
 
 import { normalizers, fromTemplate, renameInvalidProperties } from './transform_helpers';
@@ -20,11 +21,108 @@ import { settings } from '../../settings/server';
 
 const logger = new Logger('CustomOAuth');
 
-const Services = {};
-const BeforeUpdateOrCreateUserFromExternalService = [];
+type Identity = Record<string, any>;
+
+type ServiceData = {
+	_OAuthCustom: boolean;
+	serverURL: string;
+	accessToken: string;
+	idToken?: string;
+	expiresAt: number;
+	refreshToken?: string;
+	id?: string;
+	username?: string;
+	email?: string;
+	name?: string;
+	avatarUrl?: string;
+	[key: string]: any;
+};
+
+type OAuthQuery = {
+	code: string;
+	state: string;
+};
+
+type AccessTokenResponse = {
+	access_token: string;
+	id_token?: string;
+	expires_in: string;
+	refresh_token?: string;
+	error?: string;
+};
+
+type CustomOAuthOptions = {
+	serverURL?: string;
+	tokenPath?: string;
+	identityPath?: string;
+	authorizePath?: string;
+	scope?: string;
+	loginStyle?: string;
+	accessTokenParam?: string;
+	tokenSentVia?: string;
+	identityTokenSentVia?: string | null;
+	keyField?: string;
+	usernameField?: string;
+	emailField?: string;
+	nameField?: string;
+	avatarField?: string;
+	mergeUsers?: boolean;
+	mergeUsersDistinctServices?: boolean;
+	rolesClaim?: string;
+	groupsClaim?: string;
+	mapChannels?: boolean;
+	channelsMap?: string;
+	channelsAdmin?: string;
+	mergeRoles?: boolean;
+	rolesToSync?: string;
+	showButton?: boolean;
+	addAutopublishFields?: Record<string, any>;
+};
+
+type ExtendedSession = ClientSession & {
+	onceSuccesfulCommit: (cb: () => void | Promise<void>) => void;
+};
+
+const Services: Record<string, CustomOAuth> = {};
+const BeforeUpdateOrCreateUserFromExternalService: Array<(serviceName: string, serviceData: ServiceData, options?: any) => Promise<void>> =
+	[];
 
 export class CustomOAuth {
-	constructor(name, options) {
+	name: string;
+
+	serverURL: string;
+
+	tokenPath: string;
+
+	identityPath: string;
+
+	tokenSentVia?: string;
+
+	identityTokenSentVia?: string | null;
+
+	keyField?: string;
+
+	usernameField: string;
+
+	emailField: string;
+
+	nameField: string;
+
+	avatarField: string;
+
+	mergeUsers?: boolean;
+
+	mergeUsersDistinctServices?: boolean;
+
+	rolesClaim: string;
+
+	accessTokenParam: string;
+
+	channelsAdmin: string;
+
+	userAgent: string;
+
+	constructor(name: string, options: CustomOAuthOptions) {
 		logger.debug({ msg: 'Init CustomOAuth', name, options });
 
 		this.name = name;
@@ -49,10 +147,10 @@ export class CustomOAuth {
 		Accounts.oauth.registerService(this.name);
 		this.registerService();
 		this.addHookToProcessUser();
-		this.registerAccessTokenService(this.name, this.accessTokenParam);
+		this.registerAccessTokenService(this.name);
 	}
 
-	configure(options) {
+	configure(options: CustomOAuthOptions): void {
 		if (!Match.test(options, Object)) {
 			throw new Meteor.Error('CustomOAuth: Options is required and must be Object');
 		}
@@ -111,22 +209,22 @@ export class CustomOAuth {
 		}
 	}
 
-	async getAccessToken(query) {
+	async getAccessToken(query: OAuthQuery): Promise<AccessTokenResponse> {
 		const config = await ServiceConfiguration.configurations.findOneAsync({ service: this.name });
 		if (!config) {
 			throw new Accounts.ConfigError();
 		}
 
-		let response = undefined;
+		let response: AccessTokenResponse | undefined = undefined;
 
-		const headers = {
+		const headers: Record<string, string> = {
 			'Content-Type': 'application/x-www-form-urlencoded',
 			'User-Agent': this.userAgent, // http://doc.gitlab.com/ce/api/users.html#Current-user
 			'Accept': 'application/json',
 		};
 		const params = new URLSearchParams({
 			code: query.code,
-			redirect_uri: OAuth._redirectUri(this.name, config),
+			redirect_uri: OAuth._redirectUri(this.name, config as any),
 			grant_type: 'authorization_code',
 			state: query.state,
 		});
@@ -137,7 +235,7 @@ export class CustomOAuth {
 			headers.Authorization = `Basic ${b64}`;
 		} else {
 			params.append('client_secret', config.secret);
-			params.append('client_id', config.clientId);
+			params.append('client_id', config.clientId || '');
 		}
 
 		try {
@@ -154,9 +252,13 @@ export class CustomOAuth {
 			}
 
 			response = await request.json();
-		} catch (err) {
+		} catch (err: any) {
 			const error = new Error(`Failed to complete OAuth handshake with ${this.name} at ${this.tokenPath}. ${err.message}`);
 			throw _.extend(error, { response: err.response });
+		}
+
+		if (!response) {
+			throw new Error(`Failed to complete OAuth handshake with ${this.name} at ${this.tokenPath}. No response received`);
 		}
 
 		if (response.error) {
@@ -167,9 +269,9 @@ export class CustomOAuth {
 		}
 	}
 
-	async getIdentity(accessToken) {
-		const params = {};
-		const headers = {
+	async getIdentity(accessToken: string, _query?: any): Promise<Identity> {
+		const params: Record<string, string> = {};
+		const headers: Record<string, string> = {
 			'User-Agent': this.userAgent, // http://doc.gitlab.com/ce/api/users.html#Current-user
 			'Accept': 'application/json',
 		};
@@ -193,21 +295,20 @@ export class CustomOAuth {
 			logger.debug({ msg: 'Identity response', response });
 
 			return this.normalizeIdentity(response, accessToken);
-		} catch (err) {
+		} catch (err: any) {
 			const error = new Error(`Failed to fetch identity from ${this.name} at ${this.identityPath}. ${err.message}`);
 			throw _.extend(error, { response: err.response });
 		}
 	}
 
-	registerService() {
-		const self = this;
-		OAuth.registerService(this.name, 2, null, async (query) => {
-			const response = await self.getAccessToken(query);
-			const identity = await self.getIdentity(response.access_token, query);
+	registerService(): void {
+		(OAuth as any).registerService(this.name, 2, null, async (query: OAuthQuery) => {
+			const response = await this.getAccessToken(query);
+			const identity = await this.getIdentity(response.access_token);
 
-			const serviceData = {
+			const serviceData: ServiceData = {
 				_OAuthCustom: true,
-				serverURL: self.serverURL,
+				serverURL: this.serverURL,
 				accessToken: response.access_token,
 				idToken: response.id_token,
 				expiresAt: +new Date() + 1000 * parseInt(response.expires_in, 10),
@@ -235,7 +336,7 @@ export class CustomOAuth {
 		});
 	}
 
-	async normalizeIdentity(identity, accessToken) {
+	async normalizeIdentity(identity: Identity, accessToken?: string): Promise<Identity> {
 		if (identity) {
 			for (const normalizer of Object.values(normalizers)) {
 				const result = normalizer(identity);
@@ -270,13 +371,13 @@ export class CustomOAuth {
 		return renameInvalidProperties(identity);
 	}
 
-	async getEmailFromPath(accessToken) {
+	async getEmailFromPath(accessToken: string): Promise<string | undefined> {
 		if (!this.emailPath) {
 			throw new Meteor.Error('CustomOAuth: emailPath is required');
 		}
 
-		const params = {};
-		const headers = {
+		const params: Record<string, string> = {};
+		const headers: Record<string, string> = {
 			'User-Agent': this.userAgent,
 			'Accept': 'application/json',
 		};
@@ -289,26 +390,26 @@ export class CustomOAuth {
 
 		try {
 			// SECURITY: URL can only be configured by users with enough privileges. It's ok to disable this check here.
-			const request = await fetch(`${this.emailPath}`, { method: 'GET', headers, params, ignoreSsrfValidation: true });
+			const request = await fetch(`${this.emailPath}`, { method: 'GET', headers, params, ignoreSsrfValidation: true } as any);
 
 			if (!request.ok) {
 				throw new Error(request.statusText);
 			}
 
-			const response = await request.json();
+			const response: any = await request.json();
 
-			return response.find((email) => email.primary === true)?.email;
-		} catch (err) {
+			return response.find((email: any) => email.primary === true)?.email;
+		} catch (err: any) {
 			const error = new Error(`Failed to fetch emails from ${this.name} at ${this.emailPath}. ${err.message}`);
 			throw _.extend(error, { response: err.response });
 		}
 	}
 
-	retrieveCredential(credentialToken, credentialSecret) {
+	retrieveCredential(credentialToken: string, credentialSecret: string): any {
 		return OAuth.retrieveCredential(credentialToken, credentialSecret);
 	}
 
-	getUsername(data) {
+	getUsername(data: Identity): string {
 		try {
 			const value = fromTemplate(this.usernameField, data);
 
@@ -316,12 +417,12 @@ export class CustomOAuth {
 				throw new Meteor.Error('field_not_found', `Username field "${this.usernameField}" not found in data`, data);
 			}
 			return value;
-		} catch (error) {
+		} catch (error: any) {
 			throw new Error('CustomOAuth: Failed to extract username', error.message);
 		}
 	}
 
-	getEmail(data) {
+	getEmail(data: Identity): string {
 		try {
 			const value = fromTemplate(this.emailField, data);
 
@@ -329,12 +430,12 @@ export class CustomOAuth {
 				throw new Meteor.Error('field_not_found', `Email field "${this.emailField}" not found in data`, data);
 			}
 			return value;
-		} catch (error) {
+		} catch (error: any) {
 			throw new Error('CustomOAuth: Failed to extract email', error.message);
 		}
 	}
 
-	getCustomName(data) {
+	getCustomName(data: Identity): string {
 		try {
 			const value = fromTemplate(this.nameField, data);
 
@@ -343,12 +444,12 @@ export class CustomOAuth {
 			}
 
 			return value;
-		} catch (error) {
+		} catch (error: any) {
 			throw new Error('CustomOAuth: Failed to extract custom name', error.message);
 		}
 	}
 
-	getAvatarUrl(data) {
+	getAvatarUrl(data: Identity): string | undefined {
 		try {
 			const value = fromTemplate(this.avatarField, data);
 
@@ -356,12 +457,12 @@ export class CustomOAuth {
 				logger.debug({ msg: 'Avatar field not found in data', avatarField: this.avatarField, data });
 			}
 			return value;
-		} catch (error) {
+		} catch (error: any) {
 			throw new Error('CustomOAuth: Failed to extract avatar url', error.message);
 		}
 	}
 
-	getName(identity) {
+	getName(identity: Identity): string {
 		const name =
 			identity.name ||
 			identity.username ||
@@ -373,23 +474,23 @@ export class CustomOAuth {
 		return name;
 	}
 
-	addHookToProcessUser() {
+	addHookToProcessUser(): void {
 		BeforeUpdateOrCreateUserFromExternalService.push(async (serviceName, serviceData /* , options*/) => {
 			if (serviceName !== this.name) {
 				return;
 			}
 
 			if (serviceData.username) {
-				let user = undefined;
+				let user: any = undefined;
 
 				if (this.keyField === 'username') {
 					user = this.mergeUsersDistinctServices
 						? await Users.findOneByUsernameIgnoringCase(serviceData.username)
-						: await Users.findOneByUsernameAndServiceNameIgnoringCase(serviceData.username, serviceData.id, serviceName);
+						: await Users.findOneByUsernameAndServiceNameIgnoringCase(serviceData.username, serviceData.id || '', serviceName);
 				} else if (this.keyField === 'email') {
 					user = this.mergeUsersDistinctServices
-						? await Users.findOneByEmailAddress(serviceData.email)
-						: await Users.findOneByEmailAddressAndServiceNameIgnoringCase(serviceData.email, serviceData.id, serviceName);
+						? await Users.findOneByEmailAddress(serviceData.email || '')
+						: await Users.findOneByEmailAddressAndServiceNameIgnoringCase(serviceData.email || '', serviceData.id || '', serviceName);
 				}
 
 				if (!user) {
@@ -404,7 +505,7 @@ export class CustomOAuth {
 					user.services[serviceName] &&
 					user.services[serviceName].id === serviceData.id &&
 					user.name === serviceData.name &&
-					(this.keyField === 'email' || !serviceData.email || user.emails?.find(({ address }) => address === serviceData.email))
+					(this.keyField === 'email' || !serviceData.email || user.emails?.find(({ address }: any) => address === serviceData.email))
 				) {
 					return;
 				}
@@ -414,7 +515,7 @@ export class CustomOAuth {
 				}
 
 				const serviceIdKey = `services.${serviceName}.id`;
-				const successCallbacks = [
+				const successCallbacks: Array<() => void | Promise<void>> = [
 					async () => {
 						const updatedUser = await Users.findOneById(user._id, { projection: { name: 1, emails: 1, [serviceIdKey]: 1 } });
 						if (updatedUser) {
@@ -428,7 +529,7 @@ export class CustomOAuth {
 				try {
 					// Extend the session to match the ExtendedSession type expected by saveUserIdentity
 					Object.assign(session, {
-						onceSuccesfulCommit: (cb) => {
+						onceSuccesfulCommit: (cb: () => void | Promise<void>) => {
 							successCallbacks.push(cb);
 						},
 					});
@@ -441,13 +542,13 @@ export class CustomOAuth {
 						updater.set('emails', [{ address: serviceData.email, verified: true }]);
 					}
 
-					updater.set(serviceIdKey, serviceData.id);
+					(updater as any).set(serviceIdKey, serviceData.id);
 
 					await saveUserIdentity({
 						_id: user._id,
 						name: serviceData.name,
 						updater,
-						session,
+						session: session as ExtendedSession,
 						updateUsernameInBackground: true,
 						// Username needs to be included otherwise the name won't be updated in some collections
 						username: user.username,
@@ -466,7 +567,7 @@ export class CustomOAuth {
 			}
 		});
 
-		Accounts.validateNewUser((user) => {
+		Accounts.validateNewUser((user: any) => {
 			if (!user.services || !user.services[this.name] || !user.services[this.name].id) {
 				return true;
 			}
@@ -487,11 +588,10 @@ export class CustomOAuth {
 		});
 	}
 
-	registerAccessTokenService(name) {
-		const self = this;
+	registerAccessTokenService(name: string): void {
 		const whitelisted = ['id', 'email', 'username', 'name', this.rolesClaim];
 
-		registerAccessTokenService(name, async (options) => {
+		registerAccessTokenService(name, async (options: { accessToken: string; expiresIn: number }) => {
 			check(
 				options,
 				Match.ObjectIncluding({
@@ -500,11 +600,13 @@ export class CustomOAuth {
 				}),
 			);
 
-			const identity = await self.getIdentity(options.accessToken);
+			const identity = await this.getIdentity(options.accessToken);
 
-			const serviceData = {
+			const serviceData: ServiceData = {
+				_OAuthCustom: true,
+				serverURL: this.serverURL,
 				accessToken: options.accessToken,
-				expiresAt: +new Date() + 1000 * parseInt(options.expiresIn, 10),
+				expiresAt: +new Date() + 1000 * parseInt(options.expiresIn.toString(), 10),
 			};
 
 			const fields = _.pick(identity, whitelisted);
@@ -524,20 +626,22 @@ export class CustomOAuth {
 
 const { updateOrCreateUserFromExternalService } = Accounts;
 
-Accounts.updateOrCreateUserFromExternalService = async function (...args /* serviceName, serviceData, options*/) {
-	for (const hook of BeforeUpdateOrCreateUserFromExternalService) {
-		await hook.apply(this, args);
+(Accounts as any).updateOrCreateUserFromExternalService = async function (serviceName: string, serviceData: ServiceData, options?: any) {
+	for await (const hook of BeforeUpdateOrCreateUserFromExternalService) {
+		await hook.call(this, serviceName, serviceData, options);
 	}
 
-	const [serviceName, serviceData] = args;
-
-	const user = await updateOrCreateUserFromExternalService.apply(this, args);
+	const user = await (updateOrCreateUserFromExternalService as any).call(this, serviceName, serviceData, options);
 	if (!user.userId) {
 		return undefined;
 	}
 
 	const fullUser = await Users.findOneById(user.userId);
-	if (settings.get('LDAP_Update_Data_On_OAuth_Login')) {
+	if (!fullUser) {
+		return user;
+	}
+
+	if (settings.get('LDAP_Update_Data_On_OAuth_Login') && fullUser.username) {
 		await LDAP.loginAuthenticatedUserRequest(fullUser.username);
 	}
 
