@@ -470,7 +470,7 @@ export class CustomOAuth {
 			identity.CharacterName ||
 			identity.userName ||
 			identity.preferred_username ||
-			(identity.user && identity.user.name);
+			identity.user?.name;
 		return name;
 	}
 
@@ -501,8 +501,7 @@ export class CustomOAuth {
 
 				// User already created or merged and has identical name as before
 				if (
-					user.services &&
-					user.services[serviceName] &&
+					user.services?.[serviceName] &&
 					user.services[serviceName].id === serviceData.id &&
 					user.name === serviceData.name &&
 					(this.keyField === 'email' || !serviceData.email || user.emails?.find(({ address }: any) => address === serviceData.email))
@@ -568,7 +567,7 @@ export class CustomOAuth {
 		});
 
 		Accounts.validateNewUser((user: any) => {
-			if (!user.services || !user.services[this.name] || !user.services[this.name].id) {
+			if (!user.services?.[this.name]?.id) {
 				return true;
 			}
 
