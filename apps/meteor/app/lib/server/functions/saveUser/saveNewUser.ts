@@ -14,7 +14,9 @@ import type { SaveUserData } from './saveUser';
 import { sendPasswordEmail, sendWelcomeEmail } from './sendUserEmail';
 
 export const saveNewUser = async function (userData: SaveUserData, sendPassword: boolean, performedBy: IUser) {
-	await validateEmailDomain(userData.email);
+	if (userData.email) {
+		await validateEmailDomain(userData.email);
+	}
 
 	const roles = (!!userData.roles && userData.roles.length > 0 && userData.roles) || getNewUserRoles();
 	const isGuest = roles?.length === 1 && roles.includes('guest');
