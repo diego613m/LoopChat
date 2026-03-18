@@ -475,7 +475,7 @@ export class AppsRestApi {
 
 		this.api.addRoute(
 			'externalComponents',
-			{ authRequired: false },
+			{ authRequired: false, deprecation: { version: '9.0.0' } },
 			{
 				get() {
 					const externalComponents = orchestrator.getProvidedComponents();
@@ -502,9 +502,9 @@ export class AppsRestApi {
 
 		this.api.addRoute(
 			'externalComponentEvent',
-			{ authRequired: true },
+			{ authRequired: true, deprecation: { version: '9.0.0' } },
 			{
-				post() {
+				async post() {
 					if (
 						!this.bodyParams.externalComponent ||
 						!this.bodyParams.event ||
@@ -515,8 +515,8 @@ export class AppsRestApi {
 
 					try {
 						const { event, externalComponent } = this.bodyParams;
-						// FIXME this fails since there is no implementation for externalComponentEvent in ListenerBridge
-						const result = (Apps.getBridges()?.getListenerBridge() as Record<string, any>).externalComponentEvent(event, externalComponent);
+
+						const result = await Apps.triggerEvent(event, { externalComponent });
 
 						return API.v1.success({ result });
 					} catch (e: any) {
