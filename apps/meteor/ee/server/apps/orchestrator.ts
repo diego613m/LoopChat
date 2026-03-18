@@ -393,7 +393,8 @@ export class AppServerOrchestrator implements IAppServerOrchestrator {
 			return;
 		}
 
-		return (this._manager.unload as any)()
+		return this.getManager()
+			.unload(false)
 			.then(() => this._rocketchatLogger.info('Unloaded the Apps Framework.'))
 			.catch((err: any) =>
 				this._rocketchatLogger.error({
