@@ -22,10 +22,10 @@ import type {
 	ServerSettingBridge,
 	ThreadBridge,
 	UserBridge,
+	UploadBridge,
 	VideoConferenceBridge,
 } from '@rocket.chat/apps-engine/server/bridges';
 import type { OAuthAppsBridge } from '@rocket.chat/apps-engine/server/bridges/OAuthAppsBridge';
-import type { UploadBridge } from '@rocket.chat/apps-engine/server/bridges/UploadBridge';
 
 import { AppActivationBridge } from './activation';
 import { AppApisBridge } from './api';
