@@ -11,7 +11,6 @@ export { ExperimentalBridge } from './ExperimentalBridge';
 export { HttpBridge, IHttpBridgeRequestInfo } from './HttpBridge';
 export { IInternalBridge } from './IInternalBridge';
 export { IInternalFederationBridge } from './IInternalFederationBridge';
-export { IListenerBridge } from './IListenerBridge';
 export { LivechatBridge } from './LivechatBridge';
 export { MessageBridge } from './MessageBridge';
 export { ModerationBridge } from './ModerationBridge';

@@ -34,7 +34,6 @@ import type {
 	ExperimentalBridge,
 	HttpBridge,
 	IInternalBridge,
-	IListenerBridge,
 	LivechatBridge,
 	MessageBridge,
 	ModerationBridge,
@@ -163,10 +162,6 @@ export class TestsAppBridges extends AppBridges {
 
 	public getHttpBridge(): HttpBridge {
 		return this.httpBridge;
-	}
-
-	public getListenerBridge(): IListenerBridge {
-		throw new Error('Method not implemented.');
 	}
 
 	public getMessageBridge(): MessageBridge {

@@ -10,7 +10,6 @@ import type { ExperimentalBridge } from './ExperimentalBridge';
 import type { HttpBridge } from './HttpBridge';
 import type { IInternalBridge } from './IInternalBridge';
 import type { IInternalFederationBridge } from './IInternalFederationBridge';
-import type { IListenerBridge } from './IListenerBridge';
 import type { LivechatBridge } from './LivechatBridge';
 import type { MessageBridge } from './MessageBridge';
 import type { ModerationBridge } from './ModerationBridge';
@@ -34,7 +33,6 @@ export type Bridge =
 	| AppDetailChangesBridge
 	| EnvironmentalVariableBridge
 	| HttpBridge
-	| IListenerBridge
 	| LivechatBridge
 	| MessageBridge
 	| PersistenceBridge
@@ -66,8 +64,6 @@ export abstract class AppBridges {
 	public abstract getEnvironmentalVariableBridge(): EnvironmentalVariableBridge;
 
 	public abstract getHttpBridge(): HttpBridge;
-
-	public abstract getListenerBridge(): IListenerBridge;
 
 	public abstract getLivechatBridge(): LivechatBridge;
 

@@ -162,8 +162,8 @@ export class RealAppBridges extends AppBridges {
 		return this._httpBridge;
 	}
 
-	getListenerBridge() {
-		return this._lisnBridge as any; // FIXME: AppListenerBridge does not implement IListenerBridge
+	getListenerBridge(): AppListenerBridge {
+		return this._lisnBridge;
 	}
 
 	getMessageBridge(): MessageBridge {
