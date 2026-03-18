@@ -209,10 +209,18 @@ export class AppServerOrchestrator implements IAppServerOrchestrator {
 	}
 
 	debugLog(...args: any[]) {
-		if (this.isDebugging()) {
-			// FIXME: Logger.debug expects only one argument, but the method signature allows multiple
-			this.getRocketChatLogger().debug(...(args as [any]));
+		if (!this.isDebugging()) {
+			return;
 		}
+
+		const [first, ...rest] = args;
+
+		if (typeof first === 'string') {
+			this.getRocketChatLogger().debug({ msg: first, args: rest });
+			return;
+		}
+
+		this.getRocketChatLogger().debug({ args });
 	}
 
 	async load() {
