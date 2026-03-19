@@ -1,7 +1,7 @@
 import type { IAppMessagesConverter, IAppServerOrchestrator, IAppsMessage, IAppsMesssageRaw } from '@rocket.chat/apps';
 import type { IMessageAttachment } from '@rocket.chat/apps-engine/definition/messages';
-import type { FileProp, IMessage, MessageAttachment, MessageQuoteAttachment } from '@rocket.chat/core-typings';
-import { isMessageFromVisitor } from '@rocket.chat/core-typings';
+import type { FileProp, IEditedMessage, IMessage, MessageAttachment, MessageQuoteAttachment } from '@rocket.chat/core-typings';
+import { isEditedMessage, isFileAttachment, isMessageFromVisitor } from '@rocket.chat/core-typings';
 import { Messages, Rooms, Users } from '@rocket.chat/models';
 import { Random } from '@rocket.chat/random';
 import { removeEmpty } from '@rocket.chat/tools';
@@ -115,16 +115,16 @@ export class AppMessagesConverter implements IAppMessagesConverter {
 			files: async (message: IMessage) => convertMessageFiles(message.files, attachments),
 			room: async (message: IMessage) => {
 				const result = await cache.get('room')(message.rid);
-				delete (message as Partial<IMessage>).rid; // FIXME ???
+				delete (message as Partial<IMessage>).rid;
 				return result;
 			},
 			editor: async (message: IMessage) => {
-				const { editedBy } = message as { editedBy?: { _id: string } }; // FIXME ???
-				delete (message as { editedBy?: unknown }).editedBy; // FIXME ???
-
-				if (!editedBy) {
+				if (!isEditedMessage(message)) {
 					return undefined;
 				}
+
+				const { editedBy } = message;
+				delete (message as Partial<IEditedMessage>).editedBy;
 
 				return cache.get('user.convertById')(editedBy._id);
 			},
@@ -143,14 +143,16 @@ export class AppMessagesConverter implements IAppMessagesConverter {
 					? cache.get('user.convertToApp')(message.u)
 					: cache.get('user.convertById')(message.u._id));
 
-				delete (message as any).u; // FIXME the property is used right after, so we can't delete it before, what???
-
 				/**
 				 * Old System Messages from visitor doesn't have the `token` field, to not return
 				 * `sender` as undefined, so we need to add this fallback here.
 				 */
 
-				return user || cache.get('user.convertToApp')(message.u);
+				const res = user || cache.get('user.convertToApp')(message.u);
+
+				delete (message as Partial<IMessage>).u;
+
+				return res;
 			},
 		};
 
@@ -348,7 +350,11 @@ export class AppMessagesConverter implements IAppMessagesConverter {
 				delete attachment.ts;
 				return result;
 			},
-			fileId: (attachment: any) => {
+			fileId: (attachment: MessageAttachment) => {
+				if (!isFileAttachment(attachment)) {
+					return undefined;
+				}
+
 				// If the attachment is missing the fileId, but there's only one file in the message, use that file's ID
 				if (!attachment.fileId && attachment.type === 'file' && mainFile?._id && attachments.length === 1) {
 					return mainFile._id;
