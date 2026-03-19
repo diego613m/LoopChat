@@ -18,7 +18,7 @@ jest.mock('@rocket.chat/models', () => ({
 	Users: new UsersMock(),
 }));
 
-describe('The AppMessagesConverter instance', () => {
+describe('The AppRoomsConverter instance', () => {
 	let AppRoomsConverter: any;
 	let roomConverter: IAppRoomsConverter;
 	let roomsMock: RoomsMock;
