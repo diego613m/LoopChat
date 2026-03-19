@@ -10,9 +10,7 @@ import { convertMessageFiles } from './convertMessageFiles';
 import { transformMappedData } from './transformMappedData';
 
 export class AppThreadsConverter implements IAppThreadsConverter {
-	constructor(private readonly orch: IAppServerOrchestrator) {
-		this.orch = orch;
-	}
+	constructor(private readonly orch: IAppServerOrchestrator) {}
 
 	async convertById(threadId: string) {
 		const query = {
