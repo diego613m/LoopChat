@@ -132,7 +132,6 @@ export const Users = {
 	samlusernoname2: generateContext('custom_saml_username2'),
 	userForSamlMerge: generateContext('user_for_saml_merge'),
 	userForSamlMerge2: generateContext('user_for_saml_merge2'),
-	ldapuser1: generateContext('ldapuser1'),
 	admin: generateContext('rocketchat.internal.admin.test'),
 
 	ldapUser1: generateContext('alan.bean'),
