@@ -7,7 +7,7 @@ import { Users } from './userStates';
 
 export default async function injectInitialData() {
 	const connection = await MongoClient.connect(constants.URL_MONGODB);
-	const ldapHost = process.env.CI ? 'host.docker.internal' : 'localhost';
+	const ldapHost = process.env.CI === 'true' ? 'host.docker.internal' : 'localhost';
 
 	const usersFixtures = [
 		createUserFixture(Users.user1),
@@ -95,6 +95,7 @@ export default async function injectInitialData() {
 			{ _id: 'LDAP_Username_Field', value: 'uid' },
 			{ _id: 'LDAP_Email_Field', value: 'mail' },
 			{ _id: 'LDAP_Name_Field', value: 'cn' },
+			{ _id: 'LDAP_Find_User_After_Login', value: false },
 			{ _id: 'LDAP_Sync_User_Active_State', value: 'none' },
 		].map((setting) =>
 			connection

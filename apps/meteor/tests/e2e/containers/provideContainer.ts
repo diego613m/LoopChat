@@ -8,6 +8,8 @@ type ContainerData = {
 	instanceName: string;
 	containerPath: string;
 	shouldBuild?: boolean;
+	readinessCommand?: readonly string[];
+	readinessTimeoutMs?: number;
 };
 
 const containerData = {
@@ -22,10 +24,77 @@ const containerData = {
 		instanceName: 'test_openldap',
 		containerPath: path.join(__dirname, 'ldap'),
 		shouldBuild: false,
+		readinessCommand: [
+			'ldapsearch',
+			'-x',
+			'-H',
+			'ldap://127.0.0.1:1389',
+			'-D',
+			'cn=admin,dc=space,dc=air',
+			'-w',
+			'adminpassword',
+			'-b',
+			'ou=users,dc=space,dc=air',
+			'(uid=alan.bean)',
+			'uid',
+		],
 	},
 } as const;
 
-export function provideContainer({ instanceName, containerName, containerPath, shouldBuild = true }: ContainerData) {
+export function provideContainer({
+	instanceName,
+	containerName,
+	containerPath,
+	shouldBuild = true,
+	readinessCommand,
+	readinessTimeoutMs = 30_000,
+}: ContainerData) {
+	const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+	const getContainerId = (): string | undefined => {
+		try {
+			return child_process
+				.execFileSync('docker', ['compose', 'ps', '-q', instanceName], {
+					cwd: containerPath,
+					encoding: 'utf8',
+				})
+				.trim();
+		} catch {
+			return undefined;
+		}
+	};
+
+	const waitUntilReady = async (): Promise<void> => {
+		if (!readinessCommand) {
+			return;
+		}
+
+		const waitForNextAttempt = async (): Promise<void> => {
+			const containerId = getContainerId();
+			if (containerId) {
+				try {
+					child_process.execFileSync('docker', ['exec', containerId, ...readinessCommand], {
+						cwd: containerPath,
+						stdio: 'ignore',
+					});
+					return;
+				} catch {
+					// ignore and retry until timeout
+				}
+			}
+
+			if (Date.now() >= start + readinessTimeoutMs) {
+				throw new Error(`container ${instanceName} did not become ready`);
+			}
+
+			await wait(1000);
+			return waitForNextAttempt();
+		};
+
+		const start = Date.now();
+		return waitForNextAttempt();
+	};
+
 	const container = {
 		build: async () => {
 			if (!shouldBuild) {
@@ -63,6 +132,7 @@ export function provideContainer({ instanceName, containerName, containerPath, s
 		startUp: async () => {
 			await container.build();
 			await container.up();
+			await waitUntilReady();
 		},
 
 		cleanUp: async () => {

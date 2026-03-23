@@ -8,6 +8,8 @@ import { getUserInfo } from './utils/getUserInfo';
 import { setSettingValueById } from './utils/setSettingValueById';
 import { test, expect } from './utils/test';
 
+const runningOnCI = process.env.CI === 'true';
+
 const resetTestData = async () => {
 	const connection = await MongoClient.connect(constants.URL_MONGODB);
 
@@ -31,21 +33,25 @@ const resetTestData = async () => {
 };
 
 test.describe('LDAP', () => {
-	test.skip(!constants.IS_EE, 'Enterprise Only');
-
 	const container = provideContainerFor('LDAP');
 
 	test.beforeAll(async ({ api }) => {
 		await resetTestData();
 
-		// The LDAP settings are injected by the Playwright global setup; the suite only enables the feature.
+		// The params for the LDAP integration have been injected by the initial script, we only enable it by API
 		expect((await setSettingValueById(api, 'LDAP_Enable', true)).status()).toBe(200);
 
-		await container.startUp();
+		if (!runningOnCI) {
+			await container.startUp();
+		}
 	});
 
 	test.afterAll(async () => {
-		await container.cleanUp();
+		if (!runningOnCI) {
+			await container.cleanUp();
+		}
+
+		// Remove ldap test users so they don't interfere with other tests
 		await resetTestData();
 	});
 
