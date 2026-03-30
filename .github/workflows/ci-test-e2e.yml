@@ -183,8 +183,7 @@ jobs:
       - name: Start containers for CE
         if: inputs.release == 'ce'
         run: |
-          # when we are testing CE, we only need to start the rocketchat container
-          DEBUG_LOG_LEVEL=${DEBUG_LOG_LEVEL:-0} docker compose -f docker-compose-ci.yml up -d rocketchat --wait
+          DEBUG_LOG_LEVEL=${DEBUG_LOG_LEVEL:-0} docker compose -f docker-compose-ci.yml up -d rocketchat openldap --wait
 
       - name: Start containers for EE
         if: inputs.release == 'ee'
