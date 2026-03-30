@@ -1,36 +1,14 @@
 import { request } from '@playwright/test';
 
-import { BASE_API_URL } from '../config/constants';
 import { Users } from './userStates';
+import { BASE_API_URL } from '../config/constants';
 
 const headers = {
 	'X-Auth-Token': Users.admin.data.loginToken,
 	'X-User-Id': Users.admin.data.username,
 };
 
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-async function waitForAdminApi() {
-	const api = await request.newContext();
-
-	for (let attempt = 0; attempt < 15; attempt++) {
-		const response = await api.get(`${BASE_API_URL}/settings/Show_Setup_Wizard`, { headers });
-
-		if (response.ok()) {
-			await api.dispose();
-			return;
-		}
-
-		await wait(1000);
-	}
-
-	await api.dispose();
-	throw new Error('Admin settings API did not become ready in time');
-}
-
 export default async function configureAuthSettings(): Promise<void> {
-	await waitForAdminApi();
-
 	const api = await request.newContext();
 	const ldapHost = process.env.CI === 'true' ? 'openldap' : 'localhost';
 
@@ -57,16 +35,20 @@ export default async function configureAuthSettings(): Promise<void> {
 		{ id: 'LDAP_Sync_User_Active_State', value: 'none' },
 	];
 
-	for (const setting of settings) {
-		const response = await api.post(`${BASE_API_URL}/settings/${setting.id}`, {
-			data: { value: setting.value },
-			headers,
-		});
+	try {
+		await Promise.all(
+			settings.map(async (setting) => {
+				const response = await api.post(`${BASE_API_URL}/settings/${setting.id}`, {
+					data: { value: setting.value },
+					headers,
+				});
 
-		if (!response.ok()) {
-			throw new Error(`Failed to configure auth setting ${setting.id}`);
-		}
+				if (!response.ok()) {
+					throw new Error(`Failed to configure auth setting ${setting.id}`);
+				}
+			}),
+		);
+	} finally {
+		await api.dispose();
 	}
-
-	await api.dispose();
 }
