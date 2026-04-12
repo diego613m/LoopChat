@@ -2,4 +2,4 @@
 '@rocket.chat/meteor': patch
 ---
 
-Fixes pagination reset on search for Customs Sounds and Emojis
+Fixes pagination reset on search for Custom Sounds and Emojis
