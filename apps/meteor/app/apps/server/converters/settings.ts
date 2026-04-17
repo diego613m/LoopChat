@@ -27,7 +27,7 @@ export class AppSettingsConverter implements IAppSettingsConverter {
 			value: setting.value,
 			public: setting.public,
 			hidden: setting.hidden,
-			group: setting.group,
+			group: setting.group ?? undefined,
 			i18nLabel: setting.i18nLabel,
 			i18nDescription: setting.i18nDescription,
 			createdAt: setting.ts,

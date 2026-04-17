@@ -48,10 +48,10 @@ Object.assign(Accounts._defaultPublishFields.projection, (({ status: _, ...rest 
 // read the setting directly from MongoDB before proceeding with token cleanup.
 // This prevents tokens from being incorrectly deleted using Meteor's 90-day default.
 const { _expireTokens } = Accounts;
-Accounts._expireTokens = async function (oldestValidDate, userId) {
+Accounts._expireTokens = async function (oldestValidDate: Date, userId?: string) {
 	if (!Accounts._options.loginExpirationInDays) {
 		const loginExpiration = await Settings.getValueById('Accounts_LoginExpiration');
-		Accounts._options.loginExpirationInDays = getLoginExpirationInDays(loginExpiration);
+		Accounts._options.loginExpirationInDays = getLoginExpirationInDays(loginExpiration as number | undefined);
 	}
 	return _expireTokens.call(Accounts, oldestValidDate, userId);
 };

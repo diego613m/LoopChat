@@ -1,7 +1,6 @@
-import type { Meteor } from 'meteor/meteor';
-
 declare module 'meteor/accounts-base' {
 	import type { Meteor } from 'meteor/meteor';
+
 	type UserToActivateOptions = {
 		name?: string;
 		email?: string;
@@ -91,6 +90,8 @@ declare module 'meteor/accounts-base' {
 		}
 
 		export const _options: AccountsServerOptions;
+
+		export let _expireTokens: (oldestValidDate: Date, userId?: string) => Promise<void>;
 
 		namespace oauth {
 			function credentialRequestCompleteHandler(

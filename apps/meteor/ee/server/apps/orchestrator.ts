@@ -427,7 +427,7 @@ export class AppServerOrchestrator implements IAppServerOrchestrator {
 
 		return this.getBridges()
 			.getListenerBridge()
-			.handleEvent({ event, payload })
+			.handleEvent({ event, payload } as any)
 			.catch((error: any) => {
 				if (error instanceof EssentialAppDisabledException) {
 					throw new Meteor.Error('error-essential-app-disabled');

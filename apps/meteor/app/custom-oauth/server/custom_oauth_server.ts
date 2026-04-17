@@ -55,6 +55,7 @@ type CustomOAuthOptions = {
 	serverURL?: string;
 	tokenPath?: string;
 	identityPath?: string;
+	emailPath?: string;
 	authorizePath?: string;
 	scope?: string;
 	loginStyle?: string;
@@ -95,6 +96,8 @@ export class CustomOAuth {
 	tokenPath: string;
 
 	identityPath: string;
+
+	emailPath?: string;
 
 	tokenSentVia?: string;
 
@@ -205,7 +208,7 @@ export class CustomOAuth {
 		}
 
 		if (Match.test(options.addAutopublishFields, Object)) {
-			Accounts.addAutopublishFields(options.addAutopublishFields);
+			(Accounts as any).addAutopublishFields(options.addAutopublishFields);
 		}
 	}
 
@@ -354,7 +357,7 @@ export class CustomOAuth {
 			identity.email = this.getEmail(identity);
 		}
 
-		if (!identity.email && this.emailPath) {
+		if (!identity.email && this.emailPath && accessToken) {
 			identity.email = await this.getEmailFromPath(accessToken);
 		}
 
