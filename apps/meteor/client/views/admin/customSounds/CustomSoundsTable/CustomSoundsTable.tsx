@@ -65,13 +65,7 @@ const CustomSoundsTable = ({ reload, onClick }: CustomSoundsTableProps) => {
 
 	return (
 		<>
-			<FilterByText
-				value={text}
-				onChange={(event) => {
-					setText(event.target.value);
-					onSetCurrent(0);
-				}}
-			/>
+			<FilterByText value={text} onChange={(event) => setText(event.target.value)} />
 			{isLoading && (
 				<GenericTable>
 					<GenericTableHeader>{headers}</GenericTableHeader>
