@@ -14,14 +14,22 @@ type DevicesRowProps = {
 	deviceType?: string;
 	deviceOSName?: string;
 	loginAt: string;
+	current?: boolean;
 };
 
-const DeviceManagementAccountRow = ({ _id, deviceName, deviceType = 'browser', deviceOSName, loginAt }: DevicesRowProps): ReactElement => {
+const DeviceManagementAccountRow = ({
+	_id,
+	deviceName,
+	deviceType = 'browser',
+	deviceOSName,
+	loginAt,
+	current,
+}: DevicesRowProps): ReactElement => {
 	const { t } = useTranslation();
 	const formatDateAndTime = useFormatDateAndTime();
 	const mediaQuery = useMediaQuery('(min-width: 1024px)');
 
-	const handleDeviceLogout = useDeviceLogout(_id, '/v1/sessions/logout.me');
+	const handleDeviceLogout = useDeviceLogout(_id, '/v1/sessions/logout.me', current);
 
 	return (
 		<GenericTableRow key={_id} aria-label={_id}>

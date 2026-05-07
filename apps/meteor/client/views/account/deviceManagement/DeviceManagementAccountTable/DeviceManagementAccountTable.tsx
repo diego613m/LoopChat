@@ -67,6 +67,7 @@ const DeviceManagementAccountTable = (): ReactElement => {
 					deviceType={session.device?.type}
 					deviceOSName={session.device?.os.name}
 					loginAt={session.loginAt}
+					current={session.current}
 				/>
 			)}
 			current={current}
