@@ -8,7 +8,9 @@ import { useShowingResultsLabel } from './useShowingResultsLabel';
 /**
  * TODO: Move `usePagination` outside from `GenericTable` folder
  */
-export const usePagination = (): {
+export const usePagination = (
+	resetDependencies: unknown[] = [],
+): {
 	current: ReturnType<typeof useCurrent>[0];
 	setCurrent: ReturnType<typeof useCurrent>[1];
 	itemsPerPage: ReturnType<typeof useItemsPerPage>[0];
@@ -24,7 +26,7 @@ export const usePagination = (): {
 	// Reset to first page when itemsPerPage changes
 	useEffect(() => {
 		setCurrent(0);
-	}, [itemsPerPage, setCurrent]);
+	}, [itemsPerPage, setCurrent, ...resetDependencies]);
 
 	return useMemo(
 		() => ({
