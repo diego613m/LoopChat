@@ -1,5 +1,4 @@
 import type { IRoom } from '@rocket.chat/core-typings';
-import { Divider } from '@rocket.chat/fuselage';
 import { useOutsideClick, useEffectEvent } from '@rocket.chat/fuselage-hooks';
 import {
 	VideoConfPopup,
@@ -29,10 +28,9 @@ type StartCallPopupProps = {
 	room: IRoom;
 	onClose: () => void;
 	onConfirm: () => void;
-	appButtons?: { label: string; variant?: 'danger'; onClick: () => void }[];
 };
 
-const StartCallPopup = ({ id, loading, room, onClose, onConfirm, appButtons = [] }: StartCallPopupProps): ReactElement => {
+const StartCallPopup = ({ id, loading, room, onClose, onConfirm }: StartCallPopupProps): ReactElement => {
 	const { t } = useTranslation();
 	const ref = useRef<HTMLElement | null>(null);
 	useOutsideClick([ref], !loading ? onClose : () => undefined);
@@ -99,18 +97,6 @@ const StartCallPopup = ({ id, loading, room, onClose, onConfirm, appButtons = []
 				<VideoConfPopupRoomInfo room={room} />
 			</VideoConfPopupContent>
 			<VideoConfPopupFooter>
-				{appButtons.length > 0 && (
-					<>
-						<VideoConfPopupFooterButtons>
-							{appButtons.map((btn) => (
-								<VideoConfButton key={btn.label} danger={btn.variant === 'danger'} secondary={!btn.variant} onClick={btn.onClick}>
-									{btn.label}
-								</VideoConfButton>
-							))}
-						</VideoConfPopupFooterButtons>
-						<Divider />
-					</>
-				)}
 				<VideoConfPopupFooterButtons>
 					<VideoConfButton disabled={loading} primary onClick={handleStartCall}>
 						{t('Start_call')}

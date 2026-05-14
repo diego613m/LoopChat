@@ -1,5 +1,4 @@
 import { useFocusManager } from '@react-aria/focus';
-import type { VideoConfPopupType } from '@rocket.chat/apps-engine/definition/ui';
 import type { IRoom } from '@rocket.chat/core-typings';
 import { useUserRoom } from '@rocket.chat/ui-contexts';
 import {
@@ -16,7 +15,6 @@ import { useEffect, useState } from 'react';
 import IncomingPopup from './IncomingPopup';
 import OutgoingPopup from './OutgoingPopup';
 import StartCallPopup from './StartCallPopup';
-import { useVideoConfPopupAppsActionButtons } from '../../../../../../hooks/useVideoConfPopupAppsActionButtons';
 
 type TimedVideoConfPopupProps = {
 	id: string;
@@ -43,19 +41,6 @@ const TimedVideoConfPopup = ({
 	const dismissOutgoing = useVideoConfDismissOutgoing();
 	const focusManager = useFocusManager();
 	const room = useUserRoom(rid);
-
-	// Derive popupType and call hook unconditionally (before any conditional returns)
-	let popupType: VideoConfPopupType;
-
-	if (isReceiving) {
-		popupType = 'incoming';
-	} else if (isCalling) {
-		popupType = 'outgoing';
-	} else {
-		popupType = 'start';
-	}
-
-	const appButtons = useVideoConfPopupAppsActionButtons({ room: room!, callId: id, popupType });
 
 	useEffect(() => {
 		focusManager?.focusFirst();
@@ -88,26 +73,14 @@ const TimedVideoConfPopup = ({
 	};
 
 	if (isReceiving) {
-		return (
-			<IncomingPopup
-				room={room}
-				id={id}
-				position={position}
-				onClose={handleClose}
-				onMute={handleMute}
-				onConfirm={handleConfirm}
-				appButtons={appButtons}
-			/>
-		);
+		return <IncomingPopup room={room} id={id} position={position} onClose={handleClose} onMute={handleMute} onConfirm={handleConfirm} />;
 	}
 
 	if (isCalling) {
-		return <OutgoingPopup room={room} id={id} onClose={handleClose} appButtons={appButtons} />;
+		return <OutgoingPopup room={room} id={id} onClose={handleClose} />;
 	}
 
-	return (
-		<StartCallPopup loading={starting} room={room} id={id} onClose={dismissOutgoing} onConfirm={handleStartCall} appButtons={appButtons} />
-	);
+	return <StartCallPopup loading={starting} room={room} id={id} onClose={dismissOutgoing} onConfirm={handleStartCall} />;
 };
 
 export default TimedVideoConfPopup;

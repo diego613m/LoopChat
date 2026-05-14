@@ -1,5 +1,4 @@
 import type { IRoom } from '@rocket.chat/core-typings';
-import { Divider } from '@rocket.chat/fuselage';
 import {
 	VideoConfPopup,
 	VideoConfPopupContent,
@@ -24,10 +23,9 @@ type OutgoingPopupProps = {
 	id: string;
 	room: IRoom;
 	onClose: (id: string) => void;
-	appButtons?: { label: string; variant?: 'danger'; onClick: () => void }[];
 };
 
-const OutgoingPopup = ({ room, onClose, id, appButtons = [] }: OutgoingPopupProps): ReactElement => {
+const OutgoingPopup = ({ room, onClose, id }: OutgoingPopupProps): ReactElement => {
 	const { t } = useTranslation();
 	const videoConfPreferences = useVideoConfPreferences();
 	const { controllersConfig } = useVideoConfControllers(videoConfPreferences);
@@ -66,24 +64,7 @@ const OutgoingPopup = ({ room, onClose, id, appButtons = [] }: OutgoingPopupProp
 				<VideoConfPopupRoomInfo room={room} />
 			</VideoConfPopupContent>
 			<VideoConfPopupFooter>
-				{appButtons.length > 0 && (
-					<>
-						<VideoConfPopupFooterButtons>
-							{appButtons.map((btn) => (
-								<VideoConfButton key={btn.label} danger={btn.variant === 'danger'} secondary={!btn.variant} onClick={btn.onClick}>
-									{btn.label}
-								</VideoConfButton>
-							))}
-						</VideoConfPopupFooterButtons>
-						<Divider />
-					</>
-				)}
 				<VideoConfPopupFooterButtons>
-					{appButtons.map((btn) => (
-						<VideoConfButton key={btn.label} danger={btn.variant === 'danger'} secondary={!btn.variant} onClick={btn.onClick}>
-							{btn.label}
-						</VideoConfButton>
-					))}
 					{onClose && <VideoConfButton onClick={(): void => onClose(id)}>{t('Cancel')}</VideoConfButton>}
 				</VideoConfPopupFooterButtons>
 			</VideoConfPopupFooter>
