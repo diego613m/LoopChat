@@ -28,8 +28,6 @@ export interface IUActionButtonWhen {
 	hasAllRoles?: Array<string>;
 }
 
-export type VideoConfPopupType = 'incoming' | 'outgoing' | 'start';
-
 type IUIActionButtonDescriptorBase = {
 	actionId: string;
 	labelI18n: string;
@@ -37,16 +35,18 @@ type IUIActionButtonDescriptorBase = {
 	category?: 'default' | 'ai';
 };
 
-type IVideoConfPopupActionButtonDescriptor = IUIActionButtonDescriptorBase & {
-	context: UIActionButtonContext.VIDEO_CONF_POPUP_ACTION;
-	when?: IUActionButtonWhen & { popupTypes?: VideoConfPopupType[] };
+export type MediaCallState = 'new' | 'calling' | 'calling-transfer' | 'ringing' | 'ringing-transfer' | 'ongoing';
+
+type IMediaCallWidgetActionButtonDescriptor = IUIActionButtonDescriptorBase & {
+	context: UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION;
+	when?: IUActionButtonWhen & { callStates?: MediaCallState[] };
 };
 
 type IOtherActionButtonDescriptor = IUIActionButtonDescriptorBase & {
-	context: Exclude<UIActionButtonContext, UIActionButtonContext.VIDEO_CONF_POPUP_ACTION>;
+	context: Exclude<UIActionButtonContext, UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION>;
 	when?: IUActionButtonWhen;
 };
 
-export type IUIActionButtonDescriptor = IVideoConfPopupActionButtonDescriptor | IOtherActionButtonDescriptor;
+export type IUIActionButtonDescriptor = IMediaCallWidgetActionButtonDescriptor | IOtherActionButtonDescriptor;
 
 export type IUIActionButton = IUIActionButtonDescriptor & { appId: string };

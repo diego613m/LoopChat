@@ -1,5 +1,6 @@
 import type { IMessage } from '../messages';
 import type { IRoom } from '../rooms';
+import type { MediaCallState } from '../ui';
 import type { IUser } from '../users';
 
 interface IUIKitIncomingInteractionActionButtonBase {
@@ -70,18 +71,19 @@ interface IUIKitIncomingInteractionActionButtonUserDropdown extends IUIKitIncomi
 	};
 }
 
-interface IUIKitIncomingInteractionActionButtonVideoConfPopup extends IUIKitIncomingInteractionActionButtonBase {
+interface IUIKitIncomingInteractionActionButtonMediaCallWidget extends IUIKitIncomingInteractionActionButtonBase {
 	room: IRoom;
 	payload: {
-		context: 'videoConfPopupAction';
-		callId: string;
+		context: 'mediaCallWidgetAction';
+		callState: MediaCallState;
+		callId?: string;
 	};
 }
 
-export const isUIKitIncomingInteractionActionButtonVideoConfPopup = (
+export const isUIKitIncomingInteractionActionButtonMediaCallWidget = (
 	interaction: IUIKitIncomingInteractionActionButtonBase,
-): interaction is IUIKitIncomingInteractionActionButtonVideoConfPopup => {
-	return interaction.payload.context === 'videoConfPopupAction';
+): interaction is IUIKitIncomingInteractionActionButtonMediaCallWidget => {
+	return interaction.payload.context === 'mediaCallWidgetAction';
 };
 
 export type IUIKitIncomingInteractionActionButton =
@@ -90,4 +92,4 @@ export type IUIKitIncomingInteractionActionButton =
 	| IUIKitIncomingInteractionActionButtonRoomSidebar
 	| IUIKitIncomingInteractionActionButtonRoom
 	| IUIKitIncomingInteractionActionButtonUserDropdown
-	| IUIKitIncomingInteractionActionButtonVideoConfPopup;
+	| IUIKitIncomingInteractionActionButtonMediaCallWidget;

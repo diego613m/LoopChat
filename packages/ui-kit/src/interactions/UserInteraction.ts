@@ -114,12 +114,13 @@ export type RoomActionButtonUserInteraction = {
 	triggerId: string;
 };
 
-export type VideoConfPopupActionButtonUserInteraction = {
+export type MediaCallWidgetActionButtonUserInteraction = {
 	type: 'actionButton';
 	actionId: string;
 	payload: {
-		context: 'videoConfPopupAction';
-		callId: string;
+		context: 'mediaCallWidgetAction';
+		callState: string;
+		callId?: string;
 		message?: undefined;
 	};
 	mid?: undefined;
@@ -137,7 +138,7 @@ export type UserInteraction =
 	| UserDropdownActionButtonUserInteraction
 	| MesssageActionButtonUserInteraction
 	| RoomActionButtonUserInteraction
-	| VideoConfPopupActionButtonUserInteraction;
+	| MediaCallWidgetActionButtonUserInteraction;
 
 export const isMessageBlockActionUserInteraction = typia.createIs<MessageBlockActionUserInteraction>();
 export const isViewBlockActionUserInteraction = typia.createIs<ViewBlockActionUserInteraction>();
@@ -147,3 +148,4 @@ export const isMessageBoxActionButtonUserInteraction = typia.createIs<MessageBox
 export const isUserDropdownActionButtonUserInteraction = typia.createIs<UserDropdownActionButtonUserInteraction>();
 export const isMesssageActionButtonUserInteraction = typia.createIs<MesssageActionButtonUserInteraction>();
 export const isRoomActionButtonUserInteraction = typia.createIs<RoomActionButtonUserInteraction>();
+export const isMediaCallWidgetActionButtonUserInteraction = typia.createIs<MediaCallWidgetActionButtonUserInteraction>();

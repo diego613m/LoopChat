@@ -1,7 +1,7 @@
 import type {
 	IUIKitActionButtonIncomingInteraction,
 	IUIKitActionButtonMessageBoxIncomingInteraction,
-	IUIKitActionButtonVideoConfPopupIncomingInteraction,
+	IUIKitActionButtonMediaCallWidgetIncomingInteraction,
 	IUIKitBaseIncomingInteraction,
 	IUIKitBlockIncomingInteraction,
 	IUIKitViewCloseIncomingInteraction,
@@ -64,7 +64,7 @@ export class UIKitActionButtonInteractionContext extends UIKitInteractionContext
 		private readonly interactionData:
 			| IUIKitActionButtonIncomingInteraction
 			| IUIKitActionButtonMessageBoxIncomingInteraction
-			| IUIKitActionButtonVideoConfPopupIncomingInteraction,
+			| IUIKitActionButtonMediaCallWidgetIncomingInteraction,
 	) {
 		super(interactionData);
 	}

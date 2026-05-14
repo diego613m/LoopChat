@@ -25,7 +25,7 @@ import type { IUIKitResponse, IUIKitSurface, UIKitIncomingInteraction } from '@r
 import { UIKitIncomingInteractionType } from '@rocket.chat/apps-engine/definition/uikit';
 import {
 	isUIKitIncomingInteractionActionButtonMessageBox,
-	isUIKitIncomingInteractionActionButtonVideoConfPopup,
+	isUIKitIncomingInteractionActionButtonMediaCallWidget,
 } from '@rocket.chat/apps-engine/definition/uikit/IUIKitIncomingInteractionActionButton';
 import type {
 	IUIKitLivechatBlockIncomingInteraction,
@@ -1033,16 +1033,17 @@ export class AppListenerManager {
 						.catch(handleError(method));
 				}
 
-				if (isUIKitIncomingInteractionActionButtonVideoConfPopup(data)) {
+				if (isUIKitIncomingInteractionActionButtonMediaCallWidget(data)) {
 					return app
 						.call(method, {
 							appId,
 							actionId,
-							buttonContext: UIActionButtonContext.VIDEO_CONF_POPUP_ACTION,
+							buttonContext: UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION,
 							room: data.room,
 							triggerId,
 							user,
 							callId: data.payload.callId,
+							callState: data.payload.callState,
 						})
 						.catch(handleError(method));
 				}

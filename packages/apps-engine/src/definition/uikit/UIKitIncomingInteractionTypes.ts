@@ -1,6 +1,6 @@
 import type { IMessage } from '../messages';
 import type { IRoom } from '../rooms';
-import { UIActionButtonContext } from '../ui';
+import { UIActionButtonContext, type MediaCallState } from '../ui';
 import type { IUser } from '../users';
 import type { IUIKitSurface } from './IUIKitSurface';
 import type {
@@ -62,13 +62,14 @@ export function isMessageBoxIncomingInteraction(
 	return interaction.buttonContext === UIActionButtonContext.MESSAGE_BOX_ACTION;
 }
 
-export interface IUIKitActionButtonVideoConfPopupIncomingInteraction extends IUIKitActionButtonIncomingInteraction {
-	buttonContext: UIActionButtonContext.VIDEO_CONF_POPUP_ACTION;
-	callId: string;
+export interface IUIKitActionButtonMediaCallWidgetIncomingInteraction extends IUIKitActionButtonIncomingInteraction {
+	buttonContext: UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION;
+	callState: MediaCallState;
+	callId?: string;
 }
 
-export function isVideoConfPopupIncomingInteraction(
+export function isMediaCallWidgetIncomingInteraction(
 	interaction: IUIKitActionButtonIncomingInteraction,
-): interaction is IUIKitActionButtonVideoConfPopupIncomingInteraction {
-	return interaction.buttonContext === UIActionButtonContext.VIDEO_CONF_POPUP_ACTION;
+): interaction is IUIKitActionButtonMediaCallWidgetIncomingInteraction {
+	return interaction.buttonContext === UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION;
 }
