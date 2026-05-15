@@ -660,7 +660,7 @@ API.v1.addRoute(
 				if (!canViewFullOtherUserInfo) {
 					return API.v1.forbidden();
 				}
-				const escapedEmail = escapeRegExp(this.queryParams.email as string);
+				const escapedEmail = escapeRegExp(this.queryParams.email);
 				nonEmptyQuery['emails.address'] = {
 					$regex: `^${escapedEmail}$`,
 					$options: 'i',
@@ -1533,6 +1533,8 @@ API.v1.get(
 				status: 1,
 				utcOffset: 1,
 				statusText: 1,
+				statusSource: 1,
+				statusExpiresAt: 1,
 				avatarETag: 1,
 			},
 		};
@@ -1931,6 +1933,7 @@ API.v1
 			body: ajv.compile<{
 				status?: UserStatus;
 				message?: string;
+				expiresAt?: string;
 				userId?: string;
 				username?: string;
 				user?: string;
@@ -1939,6 +1942,7 @@ API.v1
 				properties: {
 					status: { type: 'string', enum: ['online', 'away', 'offline', 'busy'] },
 					message: { type: 'string', nullable: true },
+					expiresAt: { type: 'string', nullable: true },
 					userId: { type: 'string' },
 					username: { type: 'string' },
 					user: { type: 'string' },
@@ -2009,6 +2013,16 @@ API.v1
 						statusDefault: status,
 						statusSource: 'manual',
 						...(this.bodyParams.message != null && { statusText: this.bodyParams.message }),
+						...(this.bodyParams.expiresAt &&
+							(() => {
+								const date = new Date(this.bodyParams.expiresAt);
+								if (isNaN(date.getTime())) {
+									throw new Meteor.Error('error-invalid-date', 'Invalid expiresAt date string', {
+										method: 'users.setStatus',
+									});
+								}
+								return { statusExpiresAt: date };
+							})()),
 					});
 				}
 
@@ -2026,12 +2040,14 @@ API.v1
 			authRequired: true,
 			query: isUsersGetStatusParamsGET,
 			response: {
-				200: ajv.compile<{ _id: string; status: string; connectionStatus?: string }>({
+				200: ajv.compile<{ _id: string; status: string; connectionStatus?: string; statusSource?: string; statusExpiresAt?: string }>({
 					type: 'object',
 					properties: {
 						_id: { type: 'string' },
 						status: statusType,
 						connectionStatus: { type: 'string', nullable: true },
+						statusSource: { type: 'string', nullable: true },
+						statusExpiresAt: { type: 'string', nullable: true },
 						success: { type: 'boolean', enum: [true] },
 					},
 					required: ['_id', 'status', 'success'],
@@ -2045,9 +2061,10 @@ API.v1
 			if (isUserFromParams(this.queryParams, this.userId, this.user)) {
 				return API.v1.success({
 					_id: this.userId,
-					// message: user.statusText,
 					connectionStatus: (this.user.statusConnection || 'offline') as 'online' | 'offline' | 'away' | 'busy',
 					status: (this.user.status || 'offline') as 'online' | 'offline' | 'away' | 'busy',
+					...(this.user.statusSource && { statusSource: this.user.statusSource }),
+					...(this.user.statusExpiresAt && { statusExpiresAt: this.user.statusExpiresAt.toISOString() }),
 				});
 			}
 
@@ -2055,8 +2072,9 @@ API.v1
 
 			return API.v1.success({
 				_id: user._id,
-				// message: user.statusText,
 				status: (user.status || 'offline') as 'online' | 'offline' | 'away' | 'busy',
+				...(user.statusSource && { statusSource: user.statusSource }),
+				...(user.statusExpiresAt && { statusExpiresAt: user.statusExpiresAt.toISOString() }),
 			});
 		},
 	);
