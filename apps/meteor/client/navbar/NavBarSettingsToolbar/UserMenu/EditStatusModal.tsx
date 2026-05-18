@@ -78,7 +78,7 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 	const allowUserStatusMessageChange = useSetting('Accounts_AllowUserStatusMessageChange');
 	const dispatchToastMessage = useToastMessageDispatch();
 	const [customStatus, setCustomStatus] = useLocalStorage<string>('Local_Custom_Status', '');
-	const initialStatusText = customStatus || user?.statusText || '';
+	const initialStatusText = user?.statusText ?? customStatus ?? '';
 
 	const { t } = useTranslation();
 	const modalId = useId();
