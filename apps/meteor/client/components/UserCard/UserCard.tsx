@@ -66,7 +66,7 @@ const UserCard = ({
 					)}
 				</Box>
 				{customStatus && (
-					<UserCardInfo mbe={16}>
+					<UserCardInfo mbe={4}>
 						{typeof customStatus === 'string' ? (
 							<MarkdownText withTruncatedText variant='inlineWithoutBreaks' content={customStatus} parseEmoji={true} />
 						) : (
