@@ -1,5 +1,5 @@
-import type { IUser } from '@rocket.chat/core-typings';
 import { UserStatus as UserStatusType } from '@rocket.chat/core-typings';
+import { css } from '@rocket.chat/css-in-js';
 import type { SelectOption } from '@rocket.chat/fuselage';
 import {
 	Field,
@@ -10,8 +10,7 @@ import {
 	TextInput,
 	InputBox,
 	Select,
-	SelectLegacy,
-	Option,
+	Callout,
 	Margins,
 	Modal,
 	Button,
@@ -25,20 +24,21 @@ import {
 	ModalFooterControllers,
 } from '@rocket.chat/fuselage';
 import { useEffectEvent, useLocalStorage } from '@rocket.chat/fuselage-hooks';
-import { useToastMessageDispatch, useSetting, useEndpoint } from '@rocket.chat/ui-contexts';
+import { useToastMessageDispatch, useSetting, useEndpoint, useUser } from '@rocket.chat/ui-contexts';
 import type { TFunction } from 'i18next';
 import type { ReactElement, ChangeEvent, ComponentProps, FormEvent } from 'react';
 import { useState, useCallback, useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import MarkdownText from '../../../components/MarkdownText';
 import { UserStatus } from '../../../components/UserStatus';
+import UserStatusMenu from '../../../components/UserStatusMenu';
+import { useExpirationText } from '../../../components/UserStatusText';
 import { useFormatTime } from '../../../hooks/useFormatTime';
 import { USER_STATUS_TEXT_MAX_LENGTH } from '../../../lib/constants';
 
 type EditStatusModalProps = {
 	onClose: () => void;
-	userStatus: IUser['status'];
-	userStatusText: IUser['statusText'];
 };
 
 type DurationOption = {
@@ -73,27 +73,17 @@ const DURATION_OPTIONS: DurationOption[] = [
 	{ value: 'custom', getLabel: (t) => t('Status_choose_date_and_time') },
 ];
 
-const StatusOption = ({ status, label }: { status: UserStatusType; label: string }) => (
-	<Box display='flex' alignItems='center'>
-		<Box marginInlineEnd={8}>
-			<UserStatus status={status} />
-		</Box>
-		{label}
-	</Box>
-);
-
-// eslint-disable-next-line react/no-multi-comp
-const EditStatusModal = ({ onClose, userStatus, userStatusText }: EditStatusModalProps): ReactElement => {
+const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
+	const user = useUser();
 	const allowUserStatusMessageChange = useSetting('Accounts_AllowUserStatusMessageChange');
-	const allowInvisibleStatus = useSetting('Accounts_AllowInvisibleStatusOption', true);
 	const dispatchToastMessage = useToastMessageDispatch();
 	const [customStatus, setCustomStatus] = useLocalStorage<string>('Local_Custom_Status', '');
-	const initialStatusText = customStatus || userStatusText || '';
+	const initialStatusText = customStatus || user?.statusText || '';
 
 	const { t } = useTranslation();
 	const modalId = useId();
 	const [statusText, setStatusText] = useState(initialStatusText);
-	const [statusType, setStatusType] = useState(userStatus);
+	const [statusType, setStatusType] = useState(user?.status ?? UserStatusType.ONLINE);
 	const [statusTextError, setStatusTextError] = useState<string | undefined>();
 	const [duration, setDuration] = useState('');
 	const [customDate, setCustomDate] = useState(() => new Date().toLocaleDateString('en-CA'));
@@ -103,19 +93,9 @@ const EditStatusModal = ({ onClose, userStatus, userStatusText }: EditStatusModa
 	const setUserStatus = useEndpoint('POST', '/v1/users.setStatus');
 	const formatTime = useFormatTime();
 
-	const statusOptions: SelectOption[] = useMemo(() => {
-		const options: SelectOption[] = [
-			[UserStatusType.ONLINE, t('Online')],
-			[UserStatusType.AWAY, t('Away')],
-			[UserStatusType.BUSY, t('Busy')],
-		];
-
-		if (allowInvisibleStatus) {
-			options.push([UserStatusType.OFFLINE, t('Offline')]);
-		}
-
-		return options;
-	}, [t, allowInvisibleStatus]);
+	const currentStatusText = user?.statusText || t(user?.status ?? 'offline');
+	const expirationText = useExpirationText(user?.statusExpiresAt);
+	const defaultStatusLabel = `${t(statusType)} (${t('Default')})`;
 
 	const durationOptions: SelectOption[] = useMemo(
 		() => DURATION_OPTIONS.map(({ value, getLabel }) => [value, getLabel(t, formatTime, new Date())]),
@@ -154,7 +134,7 @@ const EditStatusModal = ({ onClose, userStatus, userStatusText }: EditStatusModa
 			}
 			await setUserStatus({
 				message: statusText,
-				status: statusType as UserStatusType,
+				status: statusType,
 				...(expiresAt && { expiresAt: expiresAt.toISOString() }),
 			});
 			setCustomStatus(statusText);
@@ -188,40 +168,44 @@ const EditStatusModal = ({ onClose, userStatus, userStatusText }: EditStatusModa
 			<ModalContent fontScale='p2'>
 				<Box display='flex' flexDirection='column' rowGap={12}>
 					<Field>
-						<FieldLabel htmlFor={`${modalId}-status-type`}>{t('Status')}</FieldLabel>
-						<FieldRow>
-							<SelectLegacy
-								id={`${modalId}-status-type`}
-								aria-label={t('Status')}
-								value={statusType}
-								options={statusOptions}
-								onChange={(value: string) => setStatusType(value as UserStatusType)}
-								renderSelected={({ value, label }) => (
-									<Box flexGrow='1'>
-										<StatusOption status={value as UserStatusType} label={label} />
+						<FieldLabel>{t('Status_current')}</FieldLabel>
+						<Box display='flex' alignItems='center' mbs={8}>
+							<UserStatus status={user?.status} />
+							<Box mis={8}>
+								<MarkdownText content={currentStatusText} parseEmoji variant='inlineWithoutBreaks' />
+								{expirationText && (
+									<Box color='hint' fontScale='c1'>
+										{expirationText}
 									</Box>
 								)}
-								renderItem={({ value, label, ...props }) => (
-									<Option {...props} label={<StatusOption status={value as UserStatusType} label={label} />} />
-								)}
-							/>
-						</FieldRow>
+							</Box>
+						</Box>
 					</Field>
 					<Field>
-						<FieldLabel htmlFor={`${modalId}-status-message`}>{t('StatusMessage')}</FieldLabel>
+						<FieldLabel htmlFor={`${modalId}-status-message`}>{t('Status')}</FieldLabel>
 						<FieldRow>
 							<TextInput
 								id={`${modalId}-status-message`}
-								aria-label={t('StatusMessage')}
+								aria-label={t('Status')}
 								error={statusTextError}
 								disabled={!allowUserStatusMessageChange}
 								flexGrow={1}
 								value={statusText}
 								onChange={handleStatusText}
-								placeholder={t('StatusMessage_Placeholder')}
+								placeholder={defaultStatusLabel}
+								className={css`
+									align-items: center;
+
+									& > .rcx-input-box__addon {
+										order: -1;
+										margin-inline-end: 0.5rem;
+									}
+								`}
+								addon={<UserStatusMenu margin='none' initialStatus={statusType} onChange={setStatusType} placement='bottom-start' />}
 							/>
 						</FieldRow>
 						{!allowUserStatusMessageChange && <FieldHint>{t('StatusMessage_Change_Disabled')}</FieldHint>}
+						{allowUserStatusMessageChange && <FieldHint>{t('Status_you_can_use_emoji')}</FieldHint>}
 						<FieldError>{statusTextError}</FieldError>
 					</Field>
 					<Field>
@@ -256,22 +240,18 @@ const EditStatusModal = ({ onClose, userStatus, userStatusText }: EditStatusModa
 							</Box>
 						)}
 					</Field>
+					<Callout type='info'>{t('Status_new_status_warning')}</Callout>
 				</Box>
 			</ModalContent>
 			<ModalFooter>
-				<Box display='flex' justifyContent='space-between' alignItems='center' width='100%'>
-					<Box fontScale='c1' color='hint'>
-						{t('Status_calendar_events_wont_override')}
-					</Box>
-					<ModalFooterControllers>
-						<Button secondary onClick={onClose}>
-							{t('Cancel')}
-						</Button>
-						<Button primary type='submit' disabled={!!statusTextError}>
-							{t('Save')}
-						</Button>
-					</ModalFooterControllers>
-				</Box>
+				<ModalFooterControllers>
+					<Button secondary onClick={onClose}>
+						{t('Cancel')}
+					</Button>
+					<Button primary type='submit' disabled={!!statusTextError}>
+						{t('Save')}
+					</Button>
+				</ModalFooterControllers>
 			</ModalFooter>
 		</Modal>
 	);
