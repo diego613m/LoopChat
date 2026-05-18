@@ -12,6 +12,7 @@ import {
 	DevicePicker,
 	ActionButton,
 } from '../../components';
+import AppActions from '../../components/AppActions';
 import { usePeerAutocomplete } from '../../context';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 import { useWidgetExternalControls } from '../../context/useWidgetExternalControls';
@@ -40,6 +41,7 @@ const NewCall = () => {
 				)}
 			</WidgetContent>
 			<WidgetFooter>
+				<AppActions callState='new' />
 				<ButtonGroup stretch>
 					<DevicePicker secondary />
 					<Button medium icon='phone' success flexGrow={1} onClick={onCall}>

@@ -2,6 +2,7 @@ import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryFn } from '@storybook/react';
 
 import IncomingCall from './IncomingCall';
+import MockedMediaCallAppActionsProvider from '../../providers/MockedMediaCallAppActionsProvider';
 import MockedMediaCallProvider from '../../providers/MockedMediaCallProvider';
 
 const mockedContexts = mockAppRoot()
@@ -27,4 +28,12 @@ export default {
 
 export const IncomingCallStory: StoryFn<typeof IncomingCall> = () => {
 	return <IncomingCall />;
+};
+
+export const IncomingCallWithAppButtonsStory: StoryFn<typeof IncomingCall> = () => {
+	return (
+		<MockedMediaCallAppActionsProvider>
+			<IncomingCall />
+		</MockedMediaCallAppActionsProvider>
+	);
 };

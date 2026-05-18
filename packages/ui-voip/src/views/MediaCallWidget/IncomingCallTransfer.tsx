@@ -2,6 +2,7 @@ import { Button, ButtonGroup } from '@rocket.chat/fuselage';
 import { useTranslation } from 'react-i18next';
 
 import { DevicePicker, PeerInfo, Widget, WidgetFooter, WidgetHandle, WidgetHeader, WidgetContent, WidgetInfo } from '../../components';
+import AppActions from '../../components/AppActions';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 
 const IncomingCallTransfer = () => {
@@ -25,6 +26,7 @@ const IncomingCallTransfer = () => {
 				<PeerInfo {...peerInfo} />
 			</WidgetContent>
 			<WidgetFooter>
+				<AppActions callState='ringing-transfer' />
 				<ButtonGroup stretch>
 					<Button medium name='phone' icon='phone-off' danger flexGrow={1} onClick={onEndCall}>
 						{t('Reject')}

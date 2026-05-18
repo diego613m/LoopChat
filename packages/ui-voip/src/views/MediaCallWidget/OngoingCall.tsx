@@ -1,4 +1,4 @@
-import { ButtonGroup } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup, Divider } from '@rocket.chat/fuselage';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -16,6 +16,7 @@ import {
 	useKeypad,
 	useInfoSlots,
 } from '../../components';
+import AppActions from '../../components/AppActions';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 
 const OngoingCall = () => {
@@ -55,6 +56,7 @@ const OngoingCall = () => {
 			<WidgetInfo slots={slots} />
 			<WidgetFooter>
 				{keypad}
+				<AppActions callState='ongoing' />
 				<ButtonGroup large>
 					<ActionButton disabled={connecting || reconnecting} icon='dialpad' label='Dialpad' {...keypadButtonProps} />
 					<ToggleButton label={t('Mute')} icons={['mic', 'mic-off']} titles={[t('Mute'), t('Unmute')]} pressed={muted} onToggle={onMute} />
