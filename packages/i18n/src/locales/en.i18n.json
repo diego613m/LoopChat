@@ -5154,6 +5154,7 @@
   "Status_1_hour": "1 hour",
   "Status_4_hours": "4 hours",
   "Status_choose_date_and_time": "Choose date and time",
+  "Status_expiration_must_be_future": "Expiration must be in the future",
   "Status_calendar_events_wont_override": "Calendar events won't override this",
   "Status_current": "Current status",
   "Status_you_can_use_emoji": "You can use emoji",

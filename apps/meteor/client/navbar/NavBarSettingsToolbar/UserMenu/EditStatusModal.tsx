@@ -85,6 +85,7 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 	const [statusText, setStatusText] = useState(initialStatusText);
 	const [statusType, setStatusType] = useState(user?.status ?? UserStatusType.ONLINE);
 	const [statusTextError, setStatusTextError] = useState<string | undefined>();
+	const [durationError, setDurationError] = useState<string | undefined>();
 	const [duration, setDuration] = useState('');
 	const [customDate, setCustomDate] = useState(() => new Date().toLocaleDateString('en-CA'));
 	const [customTime, setCustomTime] = useState(() => new Date().toTimeString().slice(0, 5));
@@ -129,9 +130,14 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 		try {
 			const expiresAt = computeExpiresAt();
 			if (duration === 'custom' && !expiresAt) {
-				dispatchToastMessage({ type: 'error', message: t('Status_choose_date_and_time') });
+				setDurationError(t('Status_choose_date_and_time'));
 				return;
 			}
+			if (duration === 'custom' && expiresAt && expiresAt <= new Date()) {
+				setDurationError(t('Status_expiration_must_be_future'));
+				return;
+			}
+			setDurationError(undefined);
 			await setUserStatus({
 				message: statusText,
 				status: statusType,
@@ -226,7 +232,10 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 										type='date'
 										flexGrow={1}
 										value={customDate}
-										onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomDate(e.currentTarget.value)}
+										onChange={(e: ChangeEvent<HTMLInputElement>) => {
+											setCustomDate(e.currentTarget.value);
+											setDurationError(undefined);
+										}}
 										min={minCustomDate}
 									/>
 									<InputBox
@@ -234,11 +243,15 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 										type='time'
 										flexGrow={1}
 										value={customTime}
-										onChange={(e: ChangeEvent<HTMLInputElement>) => setCustomTime(e.currentTarget.value)}
+										onChange={(e: ChangeEvent<HTMLInputElement>) => {
+											setCustomTime(e.currentTarget.value);
+											setDurationError(undefined);
+										}}
 									/>
 								</Margins>
 							</Box>
 						)}
+						{durationError && <FieldError>{durationError}</FieldError>}
 					</Field>
 					<Callout type='info'>{t('Status_new_status_warning')}</Callout>
 				</Box>
