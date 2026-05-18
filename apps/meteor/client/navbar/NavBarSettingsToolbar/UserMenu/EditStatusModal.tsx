@@ -145,11 +145,10 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 			});
 			setCustomStatus(statusText);
 			dispatchToastMessage({ type: 'success', message: t('StatusMessage_Changed_Successfully') });
+			onClose();
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-
-		onClose();
 	}, [onClose, setUserStatus, statusText, statusType, computeExpiresAt, setCustomStatus, dispatchToastMessage, t, duration]);
 
 	return (
