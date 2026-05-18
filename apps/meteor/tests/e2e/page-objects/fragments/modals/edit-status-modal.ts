@@ -12,11 +12,11 @@ export class EditStatusModal extends Modal {
 	}
 
 	private get statusMessageInput() {
-		return this.root.getByRole('textbox', { name: 'Status message' });
+		return this.root.getByRole('textbox', { name: 'Status' });
 	}
 
 	private get statusTypeButton() {
-		return this.root.getByLabel('Status', { exact: true });
+		return this.root.getByRole('button', { name: 'User status menu' });
 	}
 
 	private get durationSelect() {
@@ -31,6 +31,18 @@ export class EditStatusModal extends Modal {
 		return this.root.getByLabel('Expiration time');
 	}
 
+	get btnSubmit() {
+		return this.root.getByRole('button', { name: 'Save' });
+	}
+
+	get durationError() {
+		return this.root.getByText('Expiration must be in the future');
+	}
+
+	get durationMissingError() {
+		return this.root.locator('.rcx-field__error', { hasText: 'Choose date and time' });
+	}
+
 	async selectStatusType(status: string): Promise<void> {
 		await this.statusTypeButton.click();
 		await this.page!.getByRole('option', { name: status }).click();
@@ -38,7 +50,7 @@ export class EditStatusModal extends Modal {
 
 	async selectDuration(duration: string): Promise<void> {
 		await this.durationSelect.click();
-		await this.page!.getByRole('option', { name: duration, exact: true }).click();
+		await this.page!.getByRole('option', { name: new RegExp(duration) }).click();
 	}
 
 	async changeStatusMessage(statusMessage?: string): Promise<void> {

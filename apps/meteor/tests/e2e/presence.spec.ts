@@ -94,6 +94,66 @@ test.describe.serial('Presence', () => {
 			await editStatusModal.close();
 		});
 
+		test('should reject custom expiration in the past', async () => {
+			await poHomeChannel.navbar.openEditStatusModal();
+
+			const { editStatusModal } = poHomeChannel.navbar;
+
+			await editStatusModal.selectDuration('Choose date and time');
+
+			const now = new Date();
+			const pastTime = new Date(now.getTime() - 60 * 60_000);
+			const dateStr = now.toLocaleDateString('en-CA');
+			const timeStr = pastTime.toTimeString().slice(0, 5);
+
+			await editStatusModal.customDateInput.fill(dateStr);
+			await editStatusModal.customTimeInput.fill(timeStr);
+			await editStatusModal.btnSubmit.click();
+
+			await expect(editStatusModal.durationError).toBeVisible();
+			await editStatusModal.close();
+		});
+
+		test('should reject custom expiration when date/time is missing', async () => {
+			await poHomeChannel.navbar.openEditStatusModal();
+
+			const { editStatusModal } = poHomeChannel.navbar;
+
+			await editStatusModal.selectDuration('Choose date and time');
+			await editStatusModal.customDateInput.fill('');
+			await editStatusModal.btnSubmit.click();
+
+			await expect(editStatusModal.durationMissingError).toBeVisible();
+			await editStatusModal.close();
+		});
+
+		test('should set status with custom date/time expiration', async ({ page }) => {
+			const tomorrow = new Date();
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			const dateStr = tomorrow.toLocaleDateString('en-CA');
+			const timeStr = '12:00';
+
+			await test.step('set status with custom expiration', async () => {
+				await poHomeChannel.navbar.changeUserCustomStatusWithExpiration({
+					message: 'custom deadline',
+					duration: 'Choose date and time',
+					customDate: dateStr,
+					customTime: timeStr,
+				});
+			});
+
+			await test.step('verify expiration is displayed in user menu', async () => {
+				await poHomeChannel.navbar.btnUserMenu.click();
+				await expect(poHomeChannel.navbar.userMenu).toContainText('custom deadline');
+				await expect(poHomeChannel.navbar.userMenu).toContainText('Until');
+				await page.keyboard.press('Escape');
+			});
+
+			await test.step('clear status', async () => {
+				await poHomeChannel.navbar.changeUserCustomStatus('');
+			});
+		});
+
 		test('should set status with expiration, show it, and clear it', async ({ page }) => {
 			await test.step('set busy status with 30-minute expiration', async () => {
 				await poHomeChannel.navbar.changeUserCustomStatusWithExpiration({
