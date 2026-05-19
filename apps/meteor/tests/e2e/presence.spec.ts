@@ -103,7 +103,7 @@ test.describe.serial('Presence', () => {
 
 			const now = new Date();
 			const pastTime = new Date(now.getTime() - 60 * 60_000);
-			const dateStr = now.toLocaleDateString('en-CA');
+			const dateStr = pastTime.toLocaleDateString('en-CA');
 			const timeStr = pastTime.toTimeString().slice(0, 5);
 
 			await editStatusModal.customDateInput.fill(dateStr);
