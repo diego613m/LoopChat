@@ -72,7 +72,8 @@ const SidebarItemTemplateWithData = ({
 	userId,
 }: RoomListRowProps) => {
 	const { sidebar } = useLayout();
-	const dmUserId = room.t === 'd' ? (room.uids?.find((uid) => uid !== userId) ?? userId) : undefined;
+	const dmUserId =
+		room.t === 'd' && userId ? (room.uids?.find((uid) => uid !== userId) ?? (room.uids?.length === 1 ? userId : undefined)) : undefined;
 	const dmPresence = useUserPresence(dmUserId);
 	const { handleMouseEnter, handleMouseLeave } = useStatusTooltip(dmPresence?.statusText, dmPresence?.statusExpiresAt);
 
