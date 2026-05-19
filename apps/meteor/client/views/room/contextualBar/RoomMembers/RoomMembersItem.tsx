@@ -43,19 +43,24 @@ const RoomMembersItem = ({
 	reload,
 	useRealName,
 }: RoomMembersItemProps): ReactElement => {
-	const [showButton, setShowButton] = useState();
+	const [showButton, setShowButton] = useState(false);
 	const isReduceMotionEnabled = usePrefersReducedMotion();
 	const isInvited = subscription?.status === 'INVITED';
 	const invitationDate = isInvited ? subscription?.ts : undefined;
-	const handleMenuEvent = {
-		[isReduceMotionEnabled ? 'onMouseEnter' : 'onTransitionEnd']: setShowButton,
-	};
-
 	const preventPropagation = usePreventPropagation();
 	const [nameOrUsername, displayUsername] = getUserDisplayNames(name, username, useRealName);
 
 	const presenceData = useUserPresence(_id);
 	const { handleMouseEnter, handleMouseLeave } = useStatusTooltip(presenceData?.statusText, presenceData?.statusExpiresAt);
+
+	const handleMenuEvent = isReduceMotionEnabled
+		? {
+				onMouseEnter: (e: MouseEvent<HTMLElement>) => {
+					handleMouseEnter(e);
+					setShowButton(true);
+				},
+			}
+		: { onTransitionEnd: () => setShowButton(true) };
 
 	return (
 		<Option
