@@ -2,14 +2,13 @@ import type { IIntegration, INewIncomingIntegration, IUpdateIncomingIntegration 
 import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Integrations, Subscriptions, Users, Rooms } from '@rocket.chat/models';
 import { wrapExceptions } from '@rocket.chat/tools';
-import { Babel } from 'meteor/babel-compiler';
 import { Meteor } from 'meteor/meteor';
-import _ from 'underscore';
 
 import { addUserRolesAsync } from '../../../../../server/lib/roles/addUserRoles';
 import { hasAllPermissionAsync, hasPermissionAsync } from '../../../../authorization/server/functions/hasPermission';
 import { notifyOnIntegrationChanged } from '../../../../lib/server/lib/notifyListener';
 import { isScriptEngineFrozen, validateScriptEngine } from '../../lib/validateScriptEngine';
+import { validateScriptSyntax } from '../../lib/validateScriptSyntax';
 
 const validChannelChars = ['@', '#'];
 
@@ -84,44 +83,26 @@ export const updateIncomingIntegration = async (
 
 	const isFrozen = isScriptEngineFrozen(scriptEngine);
 
-	if (!isFrozen) {
-		let scriptCompiled: string | undefined;
-		let scriptError: Pick<Error, 'name' | 'message' | 'stack'> | undefined;
-
-		if (integration.scriptEnabled === true && integration.script && integration.script.trim() !== '') {
-			try {
-				let babelOptions = Babel.getDefaultOptions({ runtime: false });
-				babelOptions = _.extend(babelOptions, { compact: true, minified: true, comments: false });
-
-				scriptCompiled = Babel.compile(integration.script, babelOptions).code;
-				scriptError = undefined;
-				await Integrations.updateOne(
-					{ _id: integrationId },
-					{
-						$set: {
-							scriptCompiled,
-						},
-						$unset: { scriptError: 1 as const },
-					},
-				);
-			} catch (e) {
-				scriptCompiled = undefined;
-				if (e instanceof Error) {
-					const { name, message, stack } = e;
-					scriptError = { name, message, stack };
-				}
-				await Integrations.updateOne(
-					{ _id: integrationId },
-					{
-						$set: {
-							scriptError,
-						},
-						$unset: {
-							scriptCompiled: 1 as const,
-						},
-					},
-				);
-			}
+	if (!isFrozen && integration.scriptEnabled === true && integration.script && integration.script.trim() !== '') {
+		// isolated-vm embeds modern V8 and runs the script natively, so no
+		// transpilation is needed. Syntax is still validated at save time.
+		const { script, error } = validateScriptSyntax(integration.script);
+		if (error) {
+			await Integrations.updateOne(
+				{ _id: integrationId },
+				{
+					$set: { scriptError: error },
+					$unset: { scriptCompiled: 1 as const },
+				},
+			);
+		} else {
+			await Integrations.updateOne(
+				{ _id: integrationId },
+				{
+					$set: { scriptCompiled: script },
+					$unset: { scriptError: 1 as const },
+				},
+			);
 		}
 	}
 
@@ -176,17 +157,17 @@ export const updateIncomingIntegration = async (
 			$set: {
 				enabled: integration.enabled,
 				name: integration.name,
-				avatar: integration.avatar,
-				emoji: integration.emoji,
-				alias: integration.alias,
-				channel: channels,
+				...(typeof integration.avatar !== 'undefined' && { avatar: integration.avatar }),
+				...(typeof integration.emoji !== 'undefined' && { emoji: integration.emoji }),
+				...(typeof integration.alias !== 'undefined' && { alias: integration.alias }),
+				...(channels && { channel: channels }),
 				...('username' in integration && { username: user.username, userId: user._id }),
 				...(isFrozen
 					? {}
 					: {
-							script: integration.script,
+							...(typeof integration.script !== 'undefined' && { script: integration.script }),
 							scriptEnabled: integration.scriptEnabled,
-							scriptEngine,
+							...(scriptEngine && { scriptEngine }),
 						}),
 				...(typeof integration.overrideDestinationChannelEnabled !== 'undefined' && {
 					overrideDestinationChannelEnabled: integration.overrideDestinationChannelEnabled,
