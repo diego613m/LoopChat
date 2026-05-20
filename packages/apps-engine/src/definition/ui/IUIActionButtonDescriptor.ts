@@ -28,6 +28,19 @@ export interface IUActionButtonWhen {
 	hasAllRoles?: Array<string>;
 }
 
+export interface IUIActionButtonDescriptor {
+	actionId: string;
+	context: UIActionButtonContext;
+	labelI18n: string;
+	variant?: 'danger';
+	when?: IUActionButtonWhen;
+	category?: 'default' | 'ai';
+}
+
+export interface IUIActionButton extends IUIActionButtonDescriptor {
+	appId: string;
+}
+
 type IUIActionButtonDescriptorBase = {
 	actionId: string;
 	labelI18n: string;
@@ -47,6 +60,6 @@ type IOtherActionButtonDescriptor = IUIActionButtonDescriptorBase & {
 	when?: IUActionButtonWhen;
 };
 
-export type IUIActionButtonDescriptor = IMediaCallWidgetActionButtonDescriptor | IOtherActionButtonDescriptor;
+// export type IUIActionButtonDescriptor = IMediaCallWidgetActionButtonDescriptor | IOtherActionButtonDescriptor;
 
-export type IUIActionButton = IUIActionButtonDescriptor & { appId: string };
+// export type IUIActionButton = IUIActionButtonDescriptor & { appId: string };
