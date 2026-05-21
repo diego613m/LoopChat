@@ -1,6 +1,6 @@
 import type { IMessage } from '../messages';
 import type { IRoom } from '../rooms';
-import { UIActionButtonContext, type MediaCallState } from '../ui';
+import { UIActionButtonContext } from '../ui';
 import type { IUser } from '../users';
 import type { IUIKitSurface } from './IUIKitSurface';
 import type {
@@ -60,16 +60,4 @@ export function isMessageBoxIncomingInteraction(
 	interaction: IUIKitActionButtonIncomingInteraction,
 ): interaction is IUIKitActionButtonMessageBoxIncomingInteraction {
 	return interaction.buttonContext === UIActionButtonContext.MESSAGE_BOX_ACTION;
-}
-
-export interface IUIKitActionButtonMediaCallWidgetIncomingInteraction extends IUIKitActionButtonIncomingInteraction {
-	buttonContext: UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION;
-	callState: MediaCallState;
-	callId?: string;
-}
-
-export function isMediaCallWidgetIncomingInteraction(
-	interaction: IUIKitActionButtonIncomingInteraction,
-): interaction is IUIKitActionButtonMediaCallWidgetIncomingInteraction {
-	return interaction.buttonContext === UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION;
 }

@@ -1,7 +1,6 @@
 import type {
 	IUIKitActionButtonIncomingInteraction,
 	IUIKitActionButtonMessageBoxIncomingInteraction,
-	IUIKitActionButtonMediaCallWidgetIncomingInteraction,
 	IUIKitBaseIncomingInteraction,
 	IUIKitBlockIncomingInteraction,
 	IUIKitViewCloseIncomingInteraction,
@@ -61,12 +60,7 @@ export class UIKitViewCloseInteractionContext extends UIKitInteractionContext {
 }
 
 export class UIKitActionButtonInteractionContext extends UIKitInteractionContext {
-	constructor(
-		private readonly interactionData:
-			| IUIKitActionButtonIncomingInteraction
-			| IUIKitActionButtonMessageBoxIncomingInteraction
-			| IUIKitActionButtonMediaCallWidgetIncomingInteraction,
-	) {
+	constructor(private readonly interactionData: IUIKitActionButtonIncomingInteraction | IUIKitActionButtonMessageBoxIncomingInteraction) {
 		super(interactionData);
 	}
 

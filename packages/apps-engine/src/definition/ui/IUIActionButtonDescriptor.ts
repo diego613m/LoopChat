@@ -36,30 +36,6 @@ export interface IUIActionButtonDescriptor {
 	when?: IUActionButtonWhen;
 	category?: 'default' | 'ai';
 }
-
 export interface IUIActionButton extends IUIActionButtonDescriptor {
 	appId: string;
 }
-
-type IUIActionButtonDescriptorBase = {
-	actionId: string;
-	labelI18n: string;
-	variant?: 'danger';
-	category?: 'default' | 'ai';
-};
-
-export type MediaCallState = 'new' | 'calling' | 'calling-transfer' | 'ringing' | 'ringing-transfer' | 'ongoing';
-
-type IMediaCallWidgetActionButtonDescriptor = IUIActionButtonDescriptorBase & {
-	context: UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION;
-	when?: IUActionButtonWhen & { callStates?: MediaCallState[] };
-};
-
-type IOtherActionButtonDescriptor = IUIActionButtonDescriptorBase & {
-	context: Exclude<UIActionButtonContext, UIActionButtonContext.MEDIA_CALL_WIDGET_ACTION>;
-	when?: IUActionButtonWhen;
-};
-
-// export type IUIActionButtonDescriptor = IMediaCallWidgetActionButtonDescriptor | IOtherActionButtonDescriptor;
-
-// export type IUIActionButton = IUIActionButtonDescriptor & { appId: string };
