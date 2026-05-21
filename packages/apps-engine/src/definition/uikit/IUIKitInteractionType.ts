@@ -8,10 +8,6 @@ export enum UIKitInteractionType {
 	CONTEXTUAL_BAR_CLOSE = 'contextual_bar.close',
 	CONTEXTUAL_BAR_UPDATE = 'contextual_bar.update',
 	ERRORS = 'errors',
-	/**
-	 * @experimental
-	 */
-	ACTION_BUTTON_UPDATE = 'action_button.update',
 }
 
 export interface IUIKitResponse {

@@ -29,6 +29,7 @@ import type { IUser, IUserContext, IUserStatusContext, IUserUpdateContext } from
 import type { AppAccessorManager } from './AppAccessorManager';
 import type { AppManager } from '../AppManager';
 import type { ProxiedApp } from '../ProxiedApp';
+import { isIUIKitActionButtonMediaCallWidgetIncomingInteraction } from '../experimental/MediaCallActionButtons';
 import { Utilities } from '../misc/Utilities';
 import { JSONRPC_METHOD_NOT_FOUND } from '../runtime/deno/AppsEngineDenoRuntime';
 import { UIKitIncomingInteractionType, type UIKitIncomingInteraction } from '../uikit/IUIKitIncomingInteraction';
@@ -1028,7 +1029,7 @@ export class AppListenerManager {
 						.catch(handleError(method));
 				}
 
-				if (isUIKitIncomingInteractionActionButtonMediaCallWidget(data)) {
+				if (isIUIKitActionButtonMediaCallWidgetIncomingInteraction(data)) {
 					return app
 						.call(method, {
 							appId,

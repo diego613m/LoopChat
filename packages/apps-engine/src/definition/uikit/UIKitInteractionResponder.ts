@@ -90,25 +90,26 @@ export class UIKitInteractionResponderImpl implements UIKitInteractionResponder 
 	 */
 
 	// This method isn't part of the base public interface, an augmentation interface is used to expose it as experimental
-	public updateActionButtonResponse(updateData: { actionId?: string; labelI18n?: string; variant?: 'danger' }):
-		| IUIKitResponse
-		| {
-				success: true;
-				appId: string;
-				triggerId: string;
-				type: `${UIKitInteractionType.ACTION_BUTTON_UPDATE}`;
-				actionId?: string;
-				labelI18n?: string;
-				variant?: 'danger';
-		  } {
-		const { appId, triggerId } = this.baseContext;
+	public updateActionButtonResponse(update: { actionId?: string; labelI18n?: string; variant?: 'danger'; disabled?: boolean }): {
+		appId: string;
+		actionId: string;
+		triggerId: string;
+		type: 'action_button.update';
+		update: {
+			actionId?: string;
+			labelI18n?: string;
+			variant?: 'danger';
+			disabled?: boolean;
+		};
+	} {
+		const { appId, actionId, triggerId } = this.baseContext;
 
 		return {
-			success: true,
-			type: UIKitInteractionType.ACTION_BUTTON_UPDATE,
+			type: 'action_button.update',
 			appId,
+			actionId: actionId as string,
 			triggerId: triggerId as string,
-			...updateData,
+			update,
 		};
 	}
 }
