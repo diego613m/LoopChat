@@ -1,20 +1,41 @@
 import type { IUser } from '@rocket.chat/core-typings';
-import { Box } from '@rocket.chat/fuselage';
+import { Box, Margins } from '@rocket.chat/fuselage';
 import { UserAvatar } from '@rocket.chat/ui-avatar';
 import { useUserDisplayName } from '@rocket.chat/ui-client';
+import { useSetting } from '@rocket.chat/ui-contexts';
+import { useTranslation } from 'react-i18next';
+
+import { UserStatus } from '../../../components/UserStatus';
+import { UserStatusText } from '../../../components/UserStatusText';
 
 type UserMenuHeaderProps = { user: IUser };
 
 const UserMenuHeader = ({ user }: UserMenuHeaderProps) => {
+	const { t } = useTranslation();
+	const presenceDisabled = useSetting('Presence_broadcast_disabled', false);
 	const displayName = useUserDisplayName(user);
 
 	return (
-		<Box display='flex' flexDirection='row' alignItems='center' minWidth='x208'>
+		<Box display='flex' flexDirection='row' alignItems='center' minWidth='x208' mbe='neg-x4' mbs='neg-x8'>
 			<Box mie={4}>
 				<UserAvatar size='x36' username={user?.username || ''} etag={user?.avatarETag} />
 			</Box>
-			<Box mis={4} fontScale='p2' fontWeight='700' withTruncatedText flexGrow={1} flexShrink={1}>
-				{displayName}
+			<Box mis={4} display='flex' overflow='hidden' flexDirection='column' fontScale='p2' mb='neg-x4' flexGrow={1} flexShrink={1}>
+				<Box withTruncatedText w='full' display='flex' alignItems='center' flexDirection='row'>
+					<Margins inline={4}>
+						<UserStatus status={presenceDisabled ? 'disabled' : user.status} />
+						<Box is='span' withTruncatedText display='inline-block' fontWeight='700'>
+							{displayName}
+						</Box>
+					</Margins>
+				</Box>
+				<Box color='hint'>
+					<UserStatusText
+						statusText={user.statusText || t(user.status ?? 'offline')}
+						statusExpiresAt={user.statusExpiresAt}
+						showExpiration
+					/>
+				</Box>
 			</Box>
 		</Box>
 	);

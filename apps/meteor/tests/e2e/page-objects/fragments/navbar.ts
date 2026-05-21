@@ -234,14 +234,13 @@ export class Navbar {
 	}
 
 	async changeUserStatus(status: 'online' | 'away' | 'busy' | 'invisible' | 'offline' | string): Promise<void> {
-		await this.openEditStatusModal();
-		await this.modals.editStatus.selectStatusType(status);
-		await this.modals.editStatus.save();
-		await this.modals.editStatus.toastMessages.dismissToast();
+		await this.btnUserMenu.click();
+		await this.getUserProfileMenuOption(status).click();
 	}
 
 	async changeUserCustomStatus(text?: string): Promise<void> {
-		await this.openEditStatusModal();
+		await this.btnUserMenu.click();
+		await this.getUserProfileMenuOption('Custom Status').click();
 		await this.modals.editStatus.changeStatusMessage(text);
 	}
 
@@ -251,7 +250,7 @@ export class Navbar {
 
 	async openEditStatusModal(): Promise<void> {
 		await this.btnUserMenu.click();
-		await this.userMenu.getByRole('menuitemcheckbox').first().click();
+		await this.getUserProfileMenuOption('Custom Status').click();
 	}
 
 	async changeUserCustomStatusWithExpiration(options: {
