@@ -1,6 +1,7 @@
-import type { CallHistoryItem, IRegisterUser } from '@rocket.chat/core-typings';
-import type { ICallHistoryModel } from '@rocket.chat/model-typings';
-import type { Db, FindOptions, IndexDescription } from 'mongodb';
+import type { CallHistoryItem, IRegisterUser, IUser } from '@rocket.chat/core-typings';
+import type { FindPaginated, ICallHistoryModel, InsertionModel } from '@rocket.chat/model-typings';
+import { escapeRegExp } from '@rocket.chat/string-helpers';
+import type { Db, Filter, FindCursor, FindOptions, IndexDescription } from 'mongodb';
 
 import { BaseRaw } from './BaseRaw';
 
@@ -45,5 +46,67 @@ export class CallHistoryRaw extends BaseRaw<CallHistoryItem> implements ICallHis
 				},
 			},
 		);
+	}
+
+	public findAllByUserIdAndSearchFilters(
+		uid: IUser['_id'],
+		filters: {
+			type?: CallHistoryItem['type'];
+			searchTerm?: string;
+			direction?: CallHistoryItem['direction'];
+			inStates?: CallHistoryItem['state'][];
+		},
+		options: FindOptions<CallHistoryItem>,
+	): FindPaginated<FindCursor<CallHistoryItem>> {
+		const { type, direction, inStates, searchTerm } = filters;
+
+		const textSearch = searchTerm ? { $regex: escapeRegExp(searchTerm), $options: 'i' } : null;
+
+		const query: Filter<CallHistoryItem> = {
+			uid,
+			...(type && { type }),
+			...(direction && { direction }),
+			...(inStates?.length && { state: { $in: inStates } }),
+			...(textSearch && {
+				$or: [
+					{
+						contactName: textSearch,
+					},
+					{
+						external: false,
+						contactUsername: textSearch,
+					},
+					{
+						external: true,
+						contactExtension: textSearch,
+					},
+					{
+						type: 'mitel',
+						contactNumber: textSearch,
+					},
+				],
+			}),
+		};
+
+		return this.findPaginated(query, options);
+	}
+
+	public async importHistoryItem(data: InsertionModel<CallHistoryItem>): Promise<CallHistoryItem['_id'] | null> {
+		const { _id, _updatedAt, uid, callId, ...documentData } = data;
+
+		const result = await this.findOneAndUpdate(
+			{
+				uid,
+				callId,
+			},
+			{ $set: documentData, $setOnInsert: { uid, callId } },
+			{ returnDocument: 'after', projection: { _id: 1 }, upsert: true },
+		);
+
+		if (!result) {
+			return null;
+		}
+
+		return result._id;
 	}
 }
