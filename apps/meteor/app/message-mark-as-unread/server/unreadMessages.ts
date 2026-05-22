@@ -1,5 +1,4 @@
 import type { IMessage, IRoom } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Messages, Subscriptions } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
 
@@ -78,16 +77,3 @@ export const unreadMessages = async (userId: string, firstUnreadMessage?: Pick<I
 		void notifyOnSubscriptionChangedByRoomIdAndUserId(originalMessage.rid, userId);
 	}
 };
-
-Meteor.methods<ServerMethods>({
-	async unreadMessages(firstUnreadMessage, room) {
-		const userId = Meteor.userId();
-		if (!userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'unreadMessages',
-			});
-		}
-
-		return unreadMessages(userId, firstUnreadMessage, room);
-	},
-});

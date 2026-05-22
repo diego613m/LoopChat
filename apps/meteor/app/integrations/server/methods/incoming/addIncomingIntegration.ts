@@ -1,5 +1,4 @@
 import type { INewIncomingIntegration, IIncomingIntegration } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Integrations, Subscriptions, Users, Rooms } from '@rocket.chat/models';
 import { Random } from '@rocket.chat/random';
 import { removeEmpty } from '@rocket.chat/tools';
@@ -175,17 +174,3 @@ export const addIncomingIntegration = async (userId: string, integration: INewIn
 
 	return integrationStored as IIncomingIntegration;
 };
-
-Meteor.methods<ServerMethods>({
-	async addIncomingIntegration(integration: INewIncomingIntegration): Promise<IIncomingIntegration> {
-		const { userId } = this;
-
-		if (!userId) {
-			throw new Meteor.Error('invalid-user', 'Invalid User', {
-				method: 'addIncomingIntegration',
-			});
-		}
-
-		return addIncomingIntegration(userId, integration);
-	},
-});

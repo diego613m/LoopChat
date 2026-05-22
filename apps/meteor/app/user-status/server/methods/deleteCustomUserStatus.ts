@@ -1,5 +1,4 @@
 import { api } from '@rocket.chat/core-services';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { CustomUserStatus } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
 
@@ -27,13 +26,3 @@ export const deleteCustomUserStatus = async (userId: string, userStatusID: strin
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async deleteCustomUserStatus(userStatusID) {
-		if (!this.userId) {
-			throw new Meteor.Error('not_authorized');
-		}
-
-		return deleteCustomUserStatus(this.userId, userStatusID);
-	},
-});

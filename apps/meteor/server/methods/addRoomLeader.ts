@@ -1,6 +1,5 @@
 import { api, Message, Team } from '@rocket.chat/core-services';
 import type { IRoom, IUser } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Subscriptions, Users } from '@rocket.chat/models';
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
@@ -85,17 +84,3 @@ export const addRoomLeader = async (fromUserId: IUser['_id'], rid: IRoom['_id'],
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async addRoomLeader(rid, userId) {
-		const uid = Meteor.userId();
-
-		if (!uid) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'addRoomLeader',
-			});
-		}
-
-		return addRoomLeader(uid, rid, userId);
-	},
-});

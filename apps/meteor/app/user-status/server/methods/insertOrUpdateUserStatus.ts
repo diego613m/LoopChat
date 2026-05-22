@@ -1,6 +1,5 @@
 import { api } from '@rocket.chat/core-services';
 import type { ICustomUserStatus } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import type { InsertionModel } from '@rocket.chat/model-typings';
 import { CustomUserStatus } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
@@ -101,13 +100,3 @@ export const insertOrUpdateUserStatus = async (userId: string, userStatusData: I
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async insertOrUpdateUserStatus(userStatusData) {
-		if (!this.userId) {
-			throw new Meteor.Error('not_authorized');
-		}
-
-		return insertOrUpdateUserStatus(this.userId, userStatusData);
-	},
-});

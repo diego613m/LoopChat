@@ -13,13 +13,6 @@ declare module '@rocket.chat/ddp-client' {
 }
 
 Meteor.methods<ServerMethods>({
-	'UserPresence:setDefaultStatus'(status) {
-		const { userId } = this;
-		if (!userId) {
-			return;
-		}
-		return Presence.setStatus(userId, status);
-	},
 	'UserPresence:online'() {
 		const { userId, connection } = this;
 		if (!userId || !connection) {

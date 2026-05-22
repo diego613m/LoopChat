@@ -2,10 +2,8 @@ import { Apps, AppEvents } from '@rocket.chat/apps';
 import { Message } from '@rocket.chat/core-services';
 import { isQuoteAttachment, isRegisterUser } from '@rocket.chat/core-typings';
 import type { IMessage, MessageAttachment, MessageQuoteAttachment } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Messages, Rooms, Subscriptions, Users } from '@rocket.chat/models';
 import { isTruthy } from '@rocket.chat/tools';
-import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
 import { canAccessRoomAsync, roomAccessAttributes } from '../../authorization/server';
@@ -195,31 +193,3 @@ export const unpinMessage = async (userId: string, message: IMessage) => {
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async pinMessage(message, pinnedAt) {
-		check(message._id, String);
-
-		const userId = Meteor.userId();
-		if (!userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'pinMessage',
-			});
-		}
-
-		return pinMessage(message, userId, pinnedAt);
-	},
-	async unpinMessage(message) {
-		check(message._id, String);
-
-		const userId = Meteor.userId();
-
-		if (!userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'unpinMessage',
-			});
-		}
-
-		return unpinMessage(userId, message);
-	},
-});

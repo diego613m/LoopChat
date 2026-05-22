@@ -1,5 +1,3 @@
-import type { IMessage } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Messages, Users, Rooms } from '@rocket.chat/models';
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
@@ -35,17 +33,3 @@ export const getUserMentionsByChannel = async (
 
 	return Messages.findVisibleByMentionAndRoomId(user.username, roomId, options).toArray();
 };
-
-Meteor.methods<ServerMethods>({
-	async getUserMentionsByChannel({ roomId, options }) {
-		const uid = Meteor.userId();
-
-		if (!uid) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'getUserMentionsByChannel',
-			});
-		}
-
-		return getUserMentionsByChannel(uid, roomId, options);
-	},
-});

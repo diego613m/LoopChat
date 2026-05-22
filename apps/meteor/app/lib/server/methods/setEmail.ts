@@ -1,5 +1,4 @@
 import type { IUser } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
@@ -24,7 +23,7 @@ export const setEmailFunction = async (email: string, user: Meteor.User | IUser)
 		});
 	}
 
-	if (user.emails?.[0] && user.emails[0].address === email) {
+	if (user.emails?.[0]?.address === email) {
 		return email;
 	}
 
@@ -36,18 +35,6 @@ export const setEmailFunction = async (email: string, user: Meteor.User | IUser)
 
 	return email;
 };
-
-Meteor.methods<ServerMethods>({
-	async setEmail(email) {
-		const user = await Meteor.userAsync();
-
-		if (!user) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'setEmail' });
-		}
-
-		return setEmailFunction(email, user);
-	},
-});
 
 RateLimiter.limitMethod('setEmail', 1, 1000, {
 	userId(/* userId*/) {

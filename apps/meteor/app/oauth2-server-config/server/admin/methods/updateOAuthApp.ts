@@ -1,5 +1,4 @@
 import type { IOAuthApps } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { OAuthApps, Users } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
 
@@ -74,13 +73,3 @@ export const updateOAuthApp = async (
 	);
 	return OAuthApps.findOneById(applicationId);
 };
-
-Meteor.methods<ServerMethods>({
-	async updateOAuthApp(applicationId, application) {
-		if (!this.userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'updateOAuthApp' });
-		}
-
-		return updateOAuthApp(this.userId, applicationId, application);
-	},
-});

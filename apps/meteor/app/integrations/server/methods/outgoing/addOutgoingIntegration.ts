@@ -1,5 +1,4 @@
 import type { INewOutgoingIntegration, IOutgoingIntegration } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Integrations } from '@rocket.chat/models';
 import { removeEmpty } from '@rocket.chat/tools';
 import { Match, check } from 'meteor/check';
@@ -72,14 +71,3 @@ export const addOutgoingIntegration = async (userId: string, integration: INewOu
 
 	return integrationStored as IOutgoingIntegration;
 };
-
-Meteor.methods<ServerMethods>({
-	async addOutgoingIntegration(integration: INewOutgoingIntegration): Promise<IOutgoingIntegration> {
-		const { userId } = this;
-		if (!userId) {
-			throw new Meteor.Error('Invalid User');
-		}
-
-		return addOutgoingIntegration(userId, integration);
-	},
-});

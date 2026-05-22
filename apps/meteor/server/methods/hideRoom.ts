@@ -1,4 +1,3 @@
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Subscriptions } from '@rocket.chat/models';
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
@@ -29,17 +28,3 @@ export const hideRoomMethod = async (userId: string, rid: string): Promise<numbe
 
 	return modifiedCount;
 };
-
-Meteor.methods<ServerMethods>({
-	async hideRoom(rid) {
-		const uid = Meteor.userId();
-
-		if (!uid) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'hideRoom',
-			});
-		}
-
-		return hideRoomMethod(uid, rid);
-	},
-});

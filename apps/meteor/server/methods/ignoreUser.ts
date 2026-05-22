@@ -1,6 +1,4 @@
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Subscriptions } from '@rocket.chat/models';
-import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
 import { notifyOnSubscriptionChangedById } from '../../app/lib/server/lib/notifyListener';
@@ -41,20 +39,3 @@ export const ignoreUser = async (
 
 	return !!result;
 };
-
-Meteor.methods<ServerMethods>({
-	async ignoreUser({ rid, userId: ignoredUser, ignore = true }) {
-		check(ignoredUser, String);
-		check(rid, String);
-		check(ignore, Boolean);
-
-		const userId = Meteor.userId();
-		if (!userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'ignoreUser',
-			});
-		}
-
-		return ignoreUser(userId, { rid, userId: ignoredUser, ignore });
-	},
-});

@@ -1,5 +1,4 @@
 import { isRegisterUser } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Users, Rooms } from '@rocket.chat/models';
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
@@ -39,14 +38,3 @@ export const executeArchiveRoom = async (userId: string, rid: string) => {
 
 	return archiveRoom(rid, user);
 };
-
-Meteor.methods<ServerMethods>({
-	async archiveRoom(rid) {
-		const userId = Meteor.userId();
-		if (!userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'archiveRoom' });
-		}
-
-		return executeArchiveRoom(userId, rid);
-	},
-});

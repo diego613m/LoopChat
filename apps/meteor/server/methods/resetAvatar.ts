@@ -1,6 +1,5 @@
 import { Upload } from '@rocket.chat/core-services';
 import type { IUser } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Users } from '@rocket.chat/models';
 import { DDPRateLimiter } from 'meteor/ddp-rate-limiter';
 import { Meteor } from 'meteor/meteor';
@@ -46,19 +45,6 @@ export const resetAvatar = async (fromUserId: IUser['_id'], userId: IUser['_id']
 
 	await Upload.resetUserAvatar(user);
 };
-
-Meteor.methods<ServerMethods>({
-	async resetAvatar(userId) {
-		const uid = Meteor.userId();
-		if (!uid) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'resetAvatar',
-			});
-		}
-
-		return resetAvatar(uid, userId);
-	},
-});
 
 DDPRateLimiter.addRule(
 	{

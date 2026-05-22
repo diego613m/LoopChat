@@ -1,9 +1,7 @@
 import { Apps, AppEvents } from '@rocket.chat/apps';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Users } from '@rocket.chat/models';
 import { SHA256 } from '@rocket.chat/sha256';
 import { Accounts } from 'meteor/accounts-base';
-import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
 import { trim } from '../../../../lib/utils/stringUtils';
@@ -60,18 +58,3 @@ export const deleteUserOwnAccount = async (fromUserId: string, password: string,
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async deleteUserOwnAccount(password, confirmRelinquish) {
-		check(password, String);
-
-		const uid = Meteor.userId();
-		if (!uid) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', {
-				method: 'deleteUserOwnAccount',
-			});
-		}
-
-		return deleteUserOwnAccount(uid, password, confirmRelinquish);
-	},
-});

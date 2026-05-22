@@ -1,4 +1,3 @@
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Integrations, IntegrationHistory } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
 
@@ -45,18 +44,3 @@ export const deleteOutgoingIntegration = async (integrationId: string, userId: s
 	await IntegrationHistory.removeByIntegrationId(integrationId);
 	void notifyOnIntegrationChangedById(integrationId, 'removed');
 };
-
-Meteor.methods<ServerMethods>({
-	async deleteOutgoingIntegration(integrationId) {
-		const userId = Meteor.userId();
-		if (!userId) {
-			throw new Meteor.Error('not_authorized', 'Unauthorized', {
-				method: 'deleteOutgoingIntegration',
-			});
-		}
-
-		await deleteOutgoingIntegration(integrationId, userId);
-
-		return true;
-	},
-});

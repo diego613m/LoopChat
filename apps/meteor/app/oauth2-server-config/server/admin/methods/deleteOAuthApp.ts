@@ -1,5 +1,4 @@
 import type { IOAuthApps } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { OAuthAccessTokens, OAuthApps, OAuthAuthCodes } from '@rocket.chat/models';
 import { Meteor } from 'meteor/meteor';
 
@@ -31,13 +30,3 @@ export const deleteOAuthApp = async (userId: string, applicationId: IOAuthApps['
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async deleteOAuthApp(applicationId) {
-		if (!this.userId) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'deleteOAuthApp' });
-		}
-
-		return deleteOAuthApp(this.userId, applicationId);
-	},
-});

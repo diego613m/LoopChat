@@ -1,6 +1,5 @@
 import { Authorization } from '@rocket.chat/core-services';
 import type { IMessage, MessageTypesValues } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Messages, Rooms } from '@rocket.chat/models';
 import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
@@ -152,20 +151,3 @@ export const getChannelHistory = async ({
 		messages: messages || [],
 	};
 };
-
-Meteor.methods<ServerMethods>({
-	async getChannelHistory({ rid, latest, oldest, inclusive, offset = 0, count = 20, unreads, showThreadMessages = true }) {
-		check(rid, String);
-
-		if (!Meteor.userId()) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'getChannelHistory' });
-		}
-
-		const fromUserId = Meteor.userId();
-		if (!fromUserId) {
-			return false;
-		}
-
-		return getChannelHistory({ rid, fromUserId, latest, oldest, inclusive, offset, count, unreads, showThreadMessages });
-	},
-});

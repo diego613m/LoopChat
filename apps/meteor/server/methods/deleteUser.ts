@@ -1,10 +1,7 @@
 import type { IUser } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { Users } from '@rocket.chat/models';
-import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
-import { hasPermissionAsync } from '../../app/authorization/server/functions/hasPermission';
 import { deleteUser } from '../../app/lib/server/functions/deleteUser';
 
 declare module '@rocket.chat/ddp-client' {
@@ -43,24 +40,3 @@ export const executeDeleteUser = async (fromUserId: IUser['_id'], userId: IUser[
 
 	return true;
 };
-
-Meteor.methods<ServerMethods>({
-	async deleteUser(userId, confirmRelinquish = false) {
-		check(userId, String);
-
-		const uid = Meteor.userId();
-		if (!uid) {
-			throw new Meteor.Error('error-not-allowed', 'Not allowed', {
-				method: 'deleteUser',
-			});
-		}
-
-		if ((await hasPermissionAsync(uid, 'delete-user')) !== true) {
-			throw new Meteor.Error('error-not-allowed', 'Not allowed', {
-				method: 'deleteUser',
-			});
-		}
-
-		return executeDeleteUser(uid, userId, confirmRelinquish);
-	},
-});

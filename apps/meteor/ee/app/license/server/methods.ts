@@ -1,7 +1,5 @@
-import type { ILicenseTag, LicenseModule } from '@rocket.chat/core-typings';
 import type { ServerMethods } from '@rocket.chat/ddp-client';
 import { License } from '@rocket.chat/license';
-import { check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
 
 declare module '@rocket.chat/ddp-client' {
@@ -15,16 +13,8 @@ declare module '@rocket.chat/ddp-client' {
 }
 
 Meteor.methods<ServerMethods>({
-	'license:hasLicense'(feature: string) {
-		check(feature, String);
-
-		return License.hasModule(feature as LicenseModule);
-	},
 	'license:getModules'() {
 		return License.getModules();
-	},
-	'license:getTags'() {
-		return License.getTags();
 	},
 	'license:isEnterprise'() {
 		return License.hasValidLicense();

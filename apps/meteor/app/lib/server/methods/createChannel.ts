@@ -1,5 +1,4 @@
-import type { ICreatedRoom, ITeam } from '@rocket.chat/core-typings';
-import type { ServerMethods } from '@rocket.chat/ddp-client';
+import type { ITeam } from '@rocket.chat/core-typings';
 import { Users, Team } from '@rocket.chat/models';
 import { Match, check } from 'meteor/check';
 import { Meteor } from 'meteor/meteor';
@@ -57,15 +56,3 @@ export const createChannelMethod = async (
 		...extraData,
 	});
 };
-
-Meteor.methods<ServerMethods>({
-	async createChannel(name, members, readOnly = false, customFields = {}, extraData = {}) {
-		const uid = Meteor.userId();
-
-		if (!uid) {
-			throw new Meteor.Error('error-invalid-user', 'Invalid user', { method: 'createChannel' });
-		}
-
-		return createChannelMethod(uid, name, members, readOnly, customFields, extraData);
-	},
-});
