@@ -1,19 +1,22 @@
 import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryFn } from '@storybook/react';
 
-import OngoingCall from './OngoingCall';
-import MockedMediaCallProvider from '../../providers/MockedMediaCallProvider';
+import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
+import { OngoingCall } from '../../../views';
+import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot().buildStoryDecorator();
 
 export default {
-	title: 'V2/Views/OngoingCall',
+	title: 'V2/Experimental/AppActionButtons/Views/OngoingCall',
 	component: OngoingCall,
 	decorators: [
 		mockedContexts,
 		(Story) => (
 			<MockedMediaCallProvider>
-				<Story />
+				<MockedMediaCallAppActionsProvider>
+					<Story />
+				</MockedMediaCallAppActionsProvider>
 			</MockedMediaCallProvider>
 		),
 	],

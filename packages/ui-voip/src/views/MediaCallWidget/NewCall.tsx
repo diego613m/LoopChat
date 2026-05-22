@@ -12,10 +12,10 @@ import {
 	DevicePicker,
 	ActionButton,
 } from '../../components';
-import AppActions from '../../components/AppActions';
 import { usePeerAutocomplete } from '../../context';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 import { useWidgetExternalControls } from '../../context/useWidgetExternalControls';
+import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 
 const NewCall = () => {
 	const { t } = useTranslation();

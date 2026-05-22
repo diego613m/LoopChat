@@ -13,7 +13,7 @@ const MockedMediaCallAppActionsProvider = ({ children, actions }: Partial<MediaC
 						handleInteraction(callState) {
 							console.log(`Action clicked in call state: ${callState}`);
 							const { promise, resolve } = Promise.withResolvers<{ update: { disabled: boolean; label: string } }>();
-							setTimeout(() => resolve({ update: { disabled: false, label: 'New label' } }), 1000);
+							setTimeout(() => resolve({ update: { disabled: false, label: 'New label' } }), 500);
 							return promise;
 						},
 					},
@@ -24,7 +24,7 @@ const MockedMediaCallAppActionsProvider = ({ children, actions }: Partial<MediaC
 						handleInteraction(callState) {
 							console.log(`Action clicked in call state: ${callState}`);
 							const { promise, resolve } = Promise.withResolvers<{ update: { disabled: boolean; label: string; variant: 'danger' } }>();
-							setTimeout(() => resolve({ update: { disabled: false, label: 'New label and variant', variant: 'danger' } }), 1000);
+							setTimeout(() => resolve({ update: { disabled: false, label: 'New label and variant', variant: 'danger' } }), 500);
 							return promise;
 						},
 					},

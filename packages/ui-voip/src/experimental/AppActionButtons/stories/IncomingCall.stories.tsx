@@ -1,8 +1,9 @@
 import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryFn } from '@storybook/react';
 
-import IncomingCall from './IncomingCall';
-import MockedMediaCallProvider from '../../providers/MockedMediaCallProvider';
+import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
+import { IncomingCall } from '../../../views';
+import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
 	.withTranslations('en', 'core', {
@@ -13,13 +14,15 @@ const mockedContexts = mockAppRoot()
 	.buildStoryDecorator();
 
 export default {
-	title: 'V2/Views/IncomingCall',
+	title: 'V2/Experimental/AppActionButtons/Views/IncomingCall',
 	component: IncomingCall,
 	decorators: [
 		mockedContexts,
 		(Story) => (
 			<MockedMediaCallProvider>
-				<Story />
+				<MockedMediaCallAppActionsProvider>
+					<Story />
+				</MockedMediaCallAppActionsProvider>
 			</MockedMediaCallProvider>
 		),
 	],

@@ -14,7 +14,7 @@ export type MediaCallAppActionsProviderProps = {
 
 type DispatchAction = {
 	type: 'updateAction';
-	payload: { appId: string; actionId: string; update: Pick<MediaCallAppAction, 'label' | 'variant' | 'disabled'> };
+	payload: { appId: string; actionId: string; update: Partial<Pick<MediaCallAppAction, 'label' | 'variant' | 'disabled'>> };
 };
 
 const MediaCallAppActionsProvider = ({ children, actions }: MediaCallAppActionsProviderProps) => {

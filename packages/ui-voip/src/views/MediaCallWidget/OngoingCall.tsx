@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Divider } from '@rocket.chat/fuselage';
+import { ButtonGroup } from '@rocket.chat/fuselage';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -16,8 +16,8 @@ import {
 	useKeypad,
 	useInfoSlots,
 } from '../../components';
-import AppActions from '../../components/AppActions';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
+import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 
 const OngoingCall = () => {
 	const { t } = useTranslation();
