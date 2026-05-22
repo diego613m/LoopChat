@@ -52,10 +52,3 @@ export const executeUploadImportFile = async (
 
 	await instance.updateProgress(ProgressStep.FILE_LOADED);
 };
-
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		uploadImportFile(binaryContent: string, contentType: string, fileName: string, importerKey: string): void;
-	}
-}

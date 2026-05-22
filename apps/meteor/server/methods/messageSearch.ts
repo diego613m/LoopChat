@@ -8,13 +8,6 @@ import { settings } from '../../app/settings/server';
 import { readSecondaryPreferred } from '../database/readSecondaryPreferred';
 import { parseMessageSearchQuery } from '../lib/parseMessageSearchQuery';
 
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		messageSearch(text: string, rid?: string, limit?: number, offset?: number): IRawSearchResult | false;
-	}
-}
-
 export const messageSearch = async function (
 	userId: string,
 	text: string,

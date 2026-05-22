@@ -33,14 +33,6 @@ const recursiveRemove = (msg: MessageAttachment, deep = 1) => {
 const shouldAdd = (attachments: MessageAttachment[], attachment: MessageQuoteAttachment) =>
 	!attachments.some((_attachment) => isQuoteAttachment(_attachment) && _attachment.message_link === attachment.message_link);
 
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		pinMessage(message: IMessage, pinnedAt?: Date): IMessage | null;
-		unpinMessage(message: IMessage): boolean;
-	}
-}
-
 export async function pinMessage(message: IMessage, userId: string, pinnedAt?: Date) {
 	let originalMessage = await Messages.findOneById(message._id);
 	if (!originalMessage?.rid) {

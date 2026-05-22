@@ -6,7 +6,6 @@ import { Meteor } from 'meteor/meteor';
 declare module '@rocket.chat/ddp-client' {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	interface ServerMethods {
-		'UserPresence:setDefaultStatus'(status: UserStatus): boolean | undefined;
 		'UserPresence:online'(): boolean | undefined;
 		'UserPresence:away'(): boolean | undefined;
 	}

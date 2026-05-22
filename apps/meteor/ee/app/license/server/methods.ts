@@ -5,9 +5,7 @@ import { Meteor } from 'meteor/meteor';
 declare module '@rocket.chat/ddp-client' {
 	// eslint-disable-next-line @typescript-eslint/naming-convention
 	interface ServerMethods {
-		'license:hasLicense'(feature: string): boolean;
 		'license:getModules'(): string[];
-		'license:getTags'(): ILicenseTag[];
 		'license:isEnterprise'(): boolean;
 	}
 }

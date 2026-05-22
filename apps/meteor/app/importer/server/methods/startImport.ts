@@ -21,10 +21,3 @@ export const executeStartImport = async ({ input }: StartImportParamsPOST, start
 
 	await instance.startImport(input, startedByUserId);
 };
-
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		startImport(params: StartImportParamsPOST): void;
-	}
-}

@@ -6,19 +6,6 @@ import { Meteor } from 'meteor/meteor';
 import { hasPermissionAsync } from '../../../authorization/server/functions/hasPermission';
 import { createRoom } from '../functions/createRoom';
 
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		createChannel(
-			name: string,
-			members: string[],
-			readOnly?: boolean,
-			customFields?: Record<string, any>,
-			extraData?: Record<string, any>,
-		): ICreatedRoom;
-	}
-}
-
 export const createChannelMethod = async (
 	userId: string,
 	name: string,

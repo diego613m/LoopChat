@@ -5,13 +5,6 @@ import { Meteor } from 'meteor/meteor';
 import logger from './logger';
 import { notifyOnSubscriptionChangedByRoomIdAndUserId } from '../../lib/server/lib/notifyListener';
 
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		unreadMessages(firstUnreadMessage?: Pick<IMessage, '_id'>, room?: IRoom['_id']): void;
-	}
-}
-
 export const unreadMessages = async (userId: string, firstUnreadMessage?: Pick<IMessage, '_id'>, room?: IRoom['_id']): Promise<void> => {
 	if (room && typeof room === 'string') {
 		const lastMessage = (

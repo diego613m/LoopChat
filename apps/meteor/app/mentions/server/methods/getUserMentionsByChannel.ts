@@ -4,13 +4,6 @@ import { Meteor } from 'meteor/meteor';
 
 import { canAccessRoomAsync } from '../../../authorization/server';
 
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		getUserMentionsByChannel(params: { roomId: string; options: { limit: number; skip: number; sort: { ts: -1 | 1 } } }): IMessage[];
-	}
-}
-
 export const getUserMentionsByChannel = async (
 	userId: string,
 	roomId: string,

@@ -8,13 +8,6 @@ import { trim } from '../../../../lib/utils/stringUtils';
 import { settings } from '../../../settings/server';
 import { deleteUser } from '../functions/deleteUser';
 
-declare module '@rocket.chat/ddp-client' {
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	interface ServerMethods {
-		deleteUserOwnAccount(password: string, confirmRelinquish?: boolean): Promise<boolean>;
-	}
-}
-
 export const deleteUserOwnAccount = async (fromUserId: string, password: string, confirmRelinquish = false): Promise<boolean> => {
 	if (!settings.get('Accounts_AllowDeleteOwnAccount')) {
 		throw new Meteor.Error('error-not-allowed', 'Not allowed', {
