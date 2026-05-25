@@ -1,10 +1,10 @@
 import { GenericMenu } from '@rocket.chat/ui-client';
-import type { CallHistoryTableExternalContact, CallHistoryTableRowProps } from '@rocket.chat/ui-voip';
+import type { ExternalCallHistoryContact, CallHistoryTableRowProps } from '@rocket.chat/ui-voip';
 import { CallHistoryTableRow, usePeekMediaSessionState, useWidgetExternalControls } from '@rocket.chat/ui-voip';
 import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-type CallHistoryRowExternalUserProps = Omit<CallHistoryTableRowProps<CallHistoryTableExternalContact>, 'onClick' | 'menu'> & {
+type CallHistoryRowExternalUserProps = Omit<CallHistoryTableRowProps<ExternalCallHistoryContact>, 'onClick' | 'menu'> & {
 	onClick: (historyId: string) => void;
 };
 
@@ -22,6 +22,10 @@ const CallHistoryRowExternalUser = ({ _id, contact, type, status, duration, time
 		if (state === 'unavailable') {
 			return [];
 		}
+		if (!('number' in contact) || !contact.number) {
+			return [];
+		}
+
 		const disabled = state !== 'available';
 		return [
 			{
