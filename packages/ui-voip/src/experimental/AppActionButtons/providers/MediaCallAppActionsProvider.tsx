@@ -1,44 +1,38 @@
-import { useMemo, useReducer, type ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 
-import type {
-	MediaCallAppAction,
-	MediaCallAppActionDescriptor,
-	MediaCallAppActionsContextValue,
-} from '../context/MediaCallAppActionsContext';
+import { useMediaCallView, type SessionState } from '../../../context';
+import type { MediaCallAppActionDescriptor, MediaCallAppActionsContextValue, MediaCallState } from '../context/MediaCallAppActionsContext';
 import MediaCallAppActionsContext from '../context/MediaCallAppActionsContext';
 
 export type MediaCallAppActionsProviderProps = {
 	children?: ReactNode;
 	actions: MediaCallAppActionDescriptor[];
+} & Pick<MediaCallAppActionsContextValue, 'handleInteraction'>;
+
+export const sessionStateToCallState = (sessionState: SessionState): MediaCallState => {
+	switch (sessionState.state) {
+		case 'calling':
+			return sessionState.transferredBy ? 'calling-transfer' : 'calling';
+		case 'ringing':
+			return sessionState.transferredBy ? 'ringing-transfer' : 'ringing';
+		case 'ongoing':
+			return 'ongoing';
+		default:
+			return 'new';
+	}
 };
 
-type DispatchAction = {
-	type: 'updateAction';
-	payload: { appId: string; actionId: string; update: Partial<Pick<MediaCallAppAction, 'label' | 'variant' | 'disabled'>> };
-};
+const MediaCallAppActionsProvider = ({ children, actions, handleInteraction }: MediaCallAppActionsProviderProps) => {
+	const view = useMediaCallView();
 
-const MediaCallAppActionsProvider = ({ children, actions }: MediaCallAppActionsProviderProps) => {
-	const [actionsState, dispatch] = useReducer(
-		(state: MediaCallAppActionsContextValue['actions'], action: DispatchAction): MediaCallAppActionsContextValue['actions'] => {
-			if (action.type === 'updateAction') {
-				return state.map((appAction) =>
-					appAction.appId === action.payload.appId && appAction.actionId === action.payload.actionId
-						? { ...appAction, ...action.payload.update }
-						: appAction,
-				);
-			}
-
-			return state;
-		},
-		actions.map((action) => ({ ...action, disabled: false }) as MediaCallAppAction),
-	);
+	const currentCallState = sessionStateToCallState(view.sessionState);
 
 	const value = useMemo<MediaCallAppActionsContextValue>(
 		() => ({
-			actions: actionsState,
-			updateAction: (appId, actionId, update) => dispatch({ type: 'updateAction', payload: { appId, actionId, update } }),
+			actions: actions.filter(({ callStates }) => !callStates || callStates.includes(currentCallState)),
+			handleInteraction,
 		}),
-		[actionsState, dispatch],
+		[actions, currentCallState, handleInteraction],
 	);
 
 	return <MediaCallAppActionsContext.Provider value={value}>{children}</MediaCallAppActionsContext.Provider>;

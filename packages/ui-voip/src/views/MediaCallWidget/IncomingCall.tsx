@@ -26,7 +26,7 @@ const IncomingCall = () => {
 				<PeerInfo {...peerInfo} />
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions callState='ringing' />
+				<AppActions />
 				<ButtonGroup stretch>
 					<Button medium name='phone' icon='phone-off' danger flexGrow={1} onClick={onEndCall}>
 						{t('Reject')}

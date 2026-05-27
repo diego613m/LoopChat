@@ -19,7 +19,7 @@ export default {
 	decorators: [
 		mockedContexts,
 		(Story) => (
-			<MockedMediaCallProvider>
+			<MockedMediaCallProvider state='new'>
 				<MockedMediaCallAppActionsProvider>
 					<Story />
 				</MockedMediaCallAppActionsProvider>

@@ -1,7 +1,7 @@
 import type { MediaCallAppActionsProviderProps } from './MediaCallAppActionsProvider';
 import MediaCallAppActionsProvider from './MediaCallAppActionsProvider';
 
-const MockedMediaCallAppActionsProvider = ({ children, actions }: Partial<MediaCallAppActionsProviderProps>) => {
+const MockedMediaCallAppActionsProvider = ({ children, actions, handleInteraction }: Partial<MediaCallAppActionsProviderProps>) => {
 	return (
 		<MediaCallAppActionsProvider
 			actions={
@@ -10,25 +10,33 @@ const MockedMediaCallAppActionsProvider = ({ children, actions }: Partial<MediaC
 						appId: 'app-id',
 						actionId: 'change-label',
 						label: 'Click to change label',
-						handleInteraction(callState) {
-							console.log(`Action clicked in call state: ${callState}`);
-							const { promise, resolve } = Promise.withResolvers<{ update: { disabled: boolean; label: string } }>();
-							setTimeout(() => resolve({ update: { disabled: false, label: 'New label' } }), 500);
-							return promise;
-						},
 					},
 					{
 						appId: 'app-id',
 						actionId: 'change-variant',
 						label: 'Click to change label AND variant',
-						handleInteraction(callState) {
-							console.log(`Action clicked in call state: ${callState}`);
-							const { promise, resolve } = Promise.withResolvers<{ update: { disabled: boolean; label: string; variant: 'danger' } }>();
-							setTimeout(() => resolve({ update: { disabled: false, label: 'New label and variant', variant: 'danger' } }), 500);
-							return promise;
-						},
 					},
 				]
+			}
+			handleInteraction={
+				handleInteraction ||
+				(async ({ button, sessionState }) => {
+					console.log(`Action clicked in call state`, { button, sessionState });
+					const { promise, resolve } = Promise.withResolvers<Awaited<ReturnType<MediaCallAppActionsProviderProps['handleInteraction']>>>();
+					setTimeout(() => {
+						switch (button.actionId) {
+							case 'change-label':
+								resolve({ update: { label: 'Label changed!' } });
+								break;
+							case 'change-variant':
+								resolve({ update: { label: 'Variant changed!', variant: 'danger' } });
+								break;
+							default:
+								resolve({ update: {} });
+						}
+					}, 500);
+					return promise;
+				})
 			}
 		>
 			{children}

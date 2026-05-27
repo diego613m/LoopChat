@@ -41,7 +41,7 @@ const NewCall = () => {
 				)}
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions callState='new' />
+				<AppActions />
 				<ButtonGroup stretch>
 					<DevicePicker secondary />
 					<Button medium icon='phone' success flexGrow={1} onClick={onCall}>

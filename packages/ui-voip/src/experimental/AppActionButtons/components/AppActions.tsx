@@ -1,13 +1,10 @@
-import { ButtonGroup, Button, Divider } from '@rocket.chat/fuselage';
+import { ButtonGroup, Divider } from '@rocket.chat/fuselage';
 
-import { useMediaCallAppActions, type MediaCallAppActionDescriptor } from '../context/MediaCallAppActionsContext';
+import AppActionButton from './AppActionButton';
+import { useMediaCallAppActions } from '../context/MediaCallAppActionsContext';
 
-export type AppActionsProps = {
-	callState: MediaCallAppActionDescriptor['handleInteraction'] extends (callState: infer CallState) => void ? CallState : never;
-};
-
-const AppActions = ({ callState }: AppActionsProps) => {
-	const { actions, updateAction } = useMediaCallAppActions();
+const AppActions = () => {
+	const { actions, handleInteraction } = useMediaCallAppActions();
 
 	if (!actions.length) {
 		return null;
@@ -16,25 +13,15 @@ const AppActions = ({ callState }: AppActionsProps) => {
 	return (
 		<>
 			<ButtonGroup vertical stretch>
-				{actions.map(({ appId, actionId, disabled, label, variant, handleInteraction }) => (
-					<Button
-						key={appId.concat(actionId)}
-						disabled={disabled}
-						medium
-						danger={variant === 'danger'}
-						flexGrow={1}
-						onClick={async () => {
-							updateAction(appId, actionId, {
-								disabled: true,
-							});
-
-							const update = await handleInteraction(callState);
-
-							updateAction(appId, actionId, { disabled: false, ...update?.update });
-						}}
-					>
-						{label}
-					</Button>
+				{actions.map(({ appId, actionId, label, variant }) => (
+					<AppActionButton
+						key={`${appId}-${actionId}`}
+						appId={appId}
+						actionId={actionId}
+						label={label}
+						variant={variant}
+						handleInteraction={handleInteraction}
+					/>
 				))}
 			</ButtonGroup>
 			<Divider />

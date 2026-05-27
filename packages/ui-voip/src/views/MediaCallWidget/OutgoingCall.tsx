@@ -28,7 +28,7 @@ const OutgoingCall = () => {
 				<PeerInfo {...peerInfo} />
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions callState='calling' />
+				<AppActions />
 				<ButtonGroup stretch>
 					<Button medium name='phone' icon='phone-off' danger flexGrow={1} onClick={onEndCall}>
 						{t('Cancel')}

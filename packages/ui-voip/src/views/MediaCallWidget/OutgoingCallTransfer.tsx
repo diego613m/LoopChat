@@ -30,7 +30,7 @@ const OutgoingCallTransfer = () => {
 				<PeerInfo {...peerInfo} />
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions callState='calling-transfer' />
+				<AppActions />
 				<ButtonGroup stretch>
 					<Button medium name='phone' icon='phone-off' danger flexGrow={1} onClick={onEndCall}>
 						{t('Cancel')}

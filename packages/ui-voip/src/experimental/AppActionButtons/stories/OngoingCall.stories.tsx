@@ -13,7 +13,7 @@ export default {
 	decorators: [
 		mockedContexts,
 		(Story) => (
-			<MockedMediaCallProvider>
+			<MockedMediaCallProvider state='ongoing'>
 				<MockedMediaCallAppActionsProvider>
 					<Story />
 				</MockedMediaCallAppActionsProvider>
@@ -24,52 +24,4 @@ export default {
 
 export const OngoingCallStory: StoryFn<typeof OngoingCall> = () => {
 	return <OngoingCall />;
-};
-
-export const OngoingCallWithSlots: StoryFn<typeof OngoingCall> = () => {
-	return (
-		<MockedMediaCallProvider muted={true} held={true}>
-			<OngoingCall />
-		</MockedMediaCallProvider>
-	);
-};
-
-export const OngoingCallWithRemoteStatus: StoryFn<typeof OngoingCall> = () => {
-	return (
-		<MockedMediaCallProvider remoteMuted={true} remoteHeld={true}>
-			<OngoingCall />
-		</MockedMediaCallProvider>
-	);
-};
-
-export const OngoingCallWithRemoteStatusMuted: StoryFn<typeof OngoingCall> = () => {
-	return (
-		<MockedMediaCallProvider remoteMuted={true} remoteHeld={false}>
-			<OngoingCall />
-		</MockedMediaCallProvider>
-	);
-};
-
-export const OngoingCallWithRemoteStatusHeld: StoryFn<typeof OngoingCall> = () => {
-	return (
-		<MockedMediaCallProvider remoteMuted={false} remoteHeld={true}>
-			<OngoingCall />
-		</MockedMediaCallProvider>
-	);
-};
-
-export const OngoingCallWithSlotsAndRemoteStatus: StoryFn<typeof OngoingCall> = () => {
-	return (
-		<MockedMediaCallProvider muted={true} held={true} remoteMuted={true} remoteHeld={true}>
-			<OngoingCall />
-		</MockedMediaCallProvider>
-	);
-};
-
-export const OngoingCallWithDmButton: StoryFn<typeof OngoingCall> = () => {
-	return (
-		<MockedMediaCallProvider onClickDirectMessage={() => undefined}>
-			<OngoingCall />
-		</MockedMediaCallProvider>
-	);
 };

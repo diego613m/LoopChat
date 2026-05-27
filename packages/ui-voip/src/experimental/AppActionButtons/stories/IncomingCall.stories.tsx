@@ -19,7 +19,7 @@ export default {
 	decorators: [
 		mockedContexts,
 		(Story) => (
-			<MockedMediaCallProvider>
+			<MockedMediaCallProvider state='ringing'>
 				<MockedMediaCallAppActionsProvider>
 					<Story />
 				</MockedMediaCallAppActionsProvider>
@@ -30,4 +30,23 @@ export default {
 
 export const IncomingCallStory: StoryFn<typeof IncomingCall> = () => {
 	return <IncomingCall />;
+};
+
+export const IncomingCallCallStateFilterStory: StoryFn<typeof IncomingCall> = () => {
+	return (
+		<MockedMediaCallAppActionsProvider
+			actions={[
+				{ appId: 'app-id', actionId: 'no-change-label', label: 'No filters' },
+				{ appId: 'app-id', actionId: 'change-label', label: 'Filters: new, ringing', callStates: ['new', 'ringing'] },
+				{
+					appId: 'app-id',
+					actionId: 'change-variant',
+					label: 'Filters: new, calling, ringing-transfer',
+					callStates: ['new', 'calling', 'ringing-transfer'],
+				},
+			]}
+		>
+			<IncomingCall />
+		</MockedMediaCallAppActionsProvider>
+	);
 };
