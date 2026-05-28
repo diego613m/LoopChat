@@ -291,7 +291,6 @@ const customSoundsEndpoints = API.v1
 				400: validateBadRequestErrorResponse,
 				401: validateUnauthorizedErrorResponse,
 				403: validateForbiddenErrorResponse,
-				404: validateNotFoundErrorResponse,
 			},
 			body: isCustomSoundsDeleteProps,
 			authRequired: true,
