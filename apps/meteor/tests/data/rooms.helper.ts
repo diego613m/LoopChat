@@ -149,17 +149,11 @@ export const addUserToRoom = ({
 	const credentialsInstance = config?.credentials || userCredentials || credentials;
 
 	if (type === 'p') {
-		return requestInstance
-			.post(api('groups.invite'))
-			.set(credentialsInstance)
-			.send({ roomId: rid, usernames });
+		return requestInstance.post(api('groups.invite')).set(credentialsInstance).send({ roomId: rid, usernames });
 	}
 
 	if (type === 'c') {
-		return requestInstance
-			.post(api('channels.invite'))
-			.set(credentialsInstance)
-			.send({ roomId: rid, username: usernames[0] });
+		return requestInstance.post(api('channels.invite')).set(credentialsInstance).send({ roomId: rid, username: usernames[0] });
 	}
 
 	// For DMs ('d') and other types, fall back to method.call
