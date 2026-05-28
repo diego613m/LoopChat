@@ -125,7 +125,7 @@ export type MediaCallWidgetActionButtonUserInteraction = {
 	};
 	mid?: undefined;
 	tmid?: undefined;
-	rid: string;
+	rid?: string;
 	triggerId: string;
 };
 
