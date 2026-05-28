@@ -117,37 +117,53 @@ export const getSubscriptionByRoomId = (roomId: IRoom['_id'], userCredentials = 
 	});
 
 /**
- * Adds users to a room using the addUsersToRoom method.
+ * Adds users to a room using the per-type REST endpoints.
  *
- * Invites one or more users to join a room using the DDP method call.
- * Supports both local and federated users, with proper error handling
- * for federation restrictions.
+ * Invites one or more users to join a room using the appropriate REST endpoint
+ * based on room type:
+ * - 'c' (channel): POST /v1/channels.invite
+ * - 'p' (group/private): POST /v1/groups.invite
+ * - 'd' (DM): Falls back to method.call/addUsersToRoom (no REST equivalent)
  *
  * @param usernames - Array of usernames to add to the room
  * @param rid - The unique identifier of the room
+ * @param type - The room type ('c' for channel, 'p' for group, 'd' for DM)
  * @param userCredentials - Optional credentials for the request (deprecated, use config instead)
  * @param config - Optional request configuration for custom domains
- * @returns Promise resolving to the method call response
+ * @returns Promise resolving to the REST API response
  */
-// TODO(ddp-removal): swap /api/v1/method.call/addUsersToRoom for the per-type
-// REST endpoints (/v1/channels.invite or /v1/groups.invite). The federation
-// suite still asserts the legacy DDP error shape (`message` field with a
-// stringified `{ error: { error } }`); migrating requires updating those
-// expectations to the REST envelope (`{ success: false, error }`).
 export const addUserToRoom = ({
 	usernames,
 	rid,
+	type,
 	userCredentials,
 	config,
 }: {
 	usernames: string[];
 	rid: IRoom['_id'];
+	type: IRoom['t'];
 	userCredentials?: Credentials;
 	config?: IRequestConfig;
 }) => {
 	const requestInstance = config?.request || request;
 	const credentialsInstance = config?.credentials || userCredentials || credentials;
 
+	if (type === 'p') {
+		return requestInstance
+			.post(api('groups.invite'))
+			.set(credentialsInstance)
+			.send({ roomId: rid, usernames });
+	}
+
+	if (type === 'c') {
+		return requestInstance
+			.post(api('channels.invite'))
+			.set(credentialsInstance)
+			.send({ roomId: rid, username: usernames[0] });
+	}
+
+	// For DMs ('d') and other types, fall back to method.call
+	// since there is no per-type REST endpoint for DM invites.
 	return requestInstance
 		.post(methodCall('addUsersToRoom'))
 		.set(credentialsInstance)

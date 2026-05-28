@@ -693,6 +693,7 @@ const waitForRoomEvent = async (
 						usernames: [userDmId3],
 						rid: rcRoom1._id,
 						config: rcUserConfig1,
+						type: 'd',
 					});
 
 					expect(response.body).toHaveProperty('success', false);
@@ -1184,6 +1185,7 @@ const waitForRoomEvent = async (
 						usernames: [rcUser3.username],
 						rid: rcRoom._id,
 						config: rcUserConfig2,
+						type: 'd',
 					});
 
 					expect(response.body).toHaveProperty('success', false);
@@ -1755,6 +1757,7 @@ const waitForRoomEvent = async (
 						usernames: [federationConfig.hs1.additionalUser1.matrixUserId],
 						rid: dmCreate.body.room._id,
 						config: rcUser1.config,
+						type: 'd',
 					});
 
 					expect(response.body).toHaveProperty('success', false);
@@ -1806,6 +1809,7 @@ const waitForRoomEvent = async (
 						usernames: [federationConfig.hs1.additionalUser1.matrixUserId],
 						rid: rcRoom._id,
 						config: rcUser1.config,
+						type: 'd',
 					});
 
 					expect(response.body).toHaveProperty('success', true);

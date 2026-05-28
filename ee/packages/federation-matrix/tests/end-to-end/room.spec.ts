@@ -232,15 +232,11 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [federationConfig.hs1.adminMatrixUserId],
 						rid: nonFederatedChannel._id,
 						config: rc1AdminRequestConfig,
+						type: 'p',
 					});
 
 					expect(response.body).toHaveProperty('success', false);
-					expect(response.body).toHaveProperty('message');
-
-					// Parse the error message from the DDP response
-					const messageData = JSON.parse(response.body.message);
-					expect(messageData).toHaveProperty('error');
-					expect(messageData.error).toHaveProperty('error', 'error-federated-users-in-non-federated-rooms');
+					expect(response.body).toHaveProperty('errorType', 'error-federated-users-in-non-federated-rooms');
 
 					// RC view: Verify the federated user was NOT added to the room's member list
 					const federatedUserInRoom = await findRoomMember(
@@ -850,6 +846,7 @@ import { SynapseClient } from '../helper/synapse-client';
 							usernames: [federationConfig.hs1.adminMatrixUserId],
 							rid: federatedChannel._id,
 							config: rc1AdminRequestConfig,
+							type: 'p',
 						});
 
 						expect(addUserResponse.body).toHaveProperty('success', true);
@@ -953,6 +950,7 @@ import { SynapseClient } from '../helper/synapse-client';
 							usernames: [federationConfig.hs1.adminMatrixUserId, federationConfig.hs1.additionalUser1.matrixUserId],
 							rid: federatedChannel._id,
 							config: rc1AdminRequestConfig,
+							type: 'p',
 						});
 
 						expect(addUserResponse.body).toHaveProperty('success', true);
@@ -1089,6 +1087,7 @@ import { SynapseClient } from '../helper/synapse-client';
 							usernames: [federationConfig.hs1.adminMatrixUserId, federationConfig.rc1.additionalUser1.username],
 							rid: federatedChannel._id,
 							config: rc1AdminRequestConfig,
+							type: 'p',
 						});
 
 						expect(addUserResponse.body).toHaveProperty('success', true);

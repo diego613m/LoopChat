@@ -184,11 +184,12 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [user.username],
 						rid: createResponse.body.group._id,
 						config: rc1AdminRequestConfig,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(400);
 					expect(addUserResponse.body).toHaveProperty('success', false);
-					expect(addUserResponse.body.message).toMatch(/error-not-authorized-federation/);
+					expect(addUserResponse.body).toHaveProperty('errorType', 'error-not-authorized-federation');
 				});
 
 				it("should be able to add a remote user to a room regardless of the user's access-federation permission defined locally", async () => {
@@ -196,12 +197,12 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [federationConfig.hs1.adminMatrixUserId],
 						rid: createResponse.body.group._id,
 						config: rc1AdminRequestConfig,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(200);
 					expect(addUserResponse.body).toHaveProperty('success', true);
-					expect(addUserResponse.body).toHaveProperty('message');
-					expect(addUserResponse.body.message).toMatch('{"msg":"result","id":"id","result":true}');
+					expect(addUserResponse.body).toHaveProperty('group');
 				});
 			});
 		});
@@ -269,11 +270,11 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [user.username],
 						rid: createResponse.body.group._id,
 						config: rc1AdminRequestConfig,
+						type: 'p',
 					}).expect(200);
 
 					expect(addUserResponse.body).toHaveProperty('success', true);
-					expect(addUserResponse.body).toHaveProperty('message');
-					expect(addUserResponse.body.message).toMatch('{"msg":"result","id":"id","result":true}');
+					expect(addUserResponse.body).toHaveProperty('group');
 				});
 			});
 		});
@@ -424,6 +425,7 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [rcValidUser2.username],
 						rid: createResponse.body.group._id,
 						config: rcValidUser1.config,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(200);
@@ -519,11 +521,12 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [userWithNonMatchingEmail.username],
 						rid: createResponse.body.group._id,
 						config: rcValidUser1.config,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(400);
 					expect(addUserResponse.body).toHaveProperty('success', false);
-					expect(addUserResponse.body.message).toMatch(/error-not-authorized-federation/);
+					expect(addUserResponse.body).toHaveProperty('errorType', 'error-not-authorized-federation');
 				});
 
 				it('should NOT be able to be added to a federated room during creation', async () => {
@@ -601,11 +604,12 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [userWithUnverifiedEmail.username],
 						rid: createResponse.body.group._id,
 						config: rcValidUser1.config,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(400);
 					expect(addUserResponse.body).toHaveProperty('success', false);
-					expect(addUserResponse.body.message).toMatch(/error-not-authorized-federation/);
+					expect(addUserResponse.body).toHaveProperty('errorType', 'error-not-authorized-federation');
 				});
 			});
 
@@ -665,11 +669,12 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [userWithoutEmail.username],
 						rid: createResponse.body.group._id,
 						config: rcValidUser1.config,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(400);
 					expect(addUserResponse.body).toHaveProperty('success', false);
-					expect(addUserResponse.body.message).toMatch(/error-not-authorized-federation/);
+					expect(addUserResponse.body).toHaveProperty('errorType', 'error-not-authorized-federation');
 				});
 			});
 
@@ -874,6 +879,7 @@ import { SynapseClient } from '../helper/synapse-client';
 						usernames: [userWithNonMatchingEmail.username],
 						rid: createResponse.body.group._id,
 						config: rc1AdminRequestConfig,
+						type: 'p',
 					});
 
 					expect(addUserResponse.status).toBe(200);
