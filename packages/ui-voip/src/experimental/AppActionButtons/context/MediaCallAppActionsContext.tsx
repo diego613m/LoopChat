@@ -34,3 +34,16 @@ const MediaCallAppActionsContext = createContext<MediaCallAppActionsContextValue
 export const useMediaCallAppActions = () => useContext(MediaCallAppActionsContext);
 
 export default MediaCallAppActionsContext;
+
+export const sessionStateToCallState = (sessionState: SessionState): MediaCallState => {
+	switch (sessionState.state) {
+		case 'calling':
+			return sessionState.transferredBy ? 'calling-transfer' : 'calling';
+		case 'ringing':
+			return sessionState.transferredBy ? 'ringing-transfer' : 'ringing';
+		case 'ongoing':
+			return 'ongoing';
+		default:
+			return 'new';
+	}
+};

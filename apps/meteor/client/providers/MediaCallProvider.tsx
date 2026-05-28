@@ -1,7 +1,6 @@
 import { Emitter } from '@rocket.chat/emitter';
 import { usePermission } from '@rocket.chat/ui-contexts';
 import { MediaCallProvider as MediaCallProviderBase, MediaCallInstanceContext } from '@rocket.chat/ui-voip';
-import { MediaCallAppActionsProvider } from '@rocket.chat/ui-voip/dist/experimental/AppActionButtons';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 
@@ -11,7 +10,7 @@ import { useMediaCallWidgetAppsActionButtons } from '../hooks/useMediaCallWidget
 const MediaCallProvider = ({ children }: { children: ReactNode }) => {
 	const canMakeInternalCall = usePermission('allow-internal-voice-calls');
 	const canMakeExternalCall = usePermission('allow-external-voice-calls');
-	const appsActionButtons = useMediaCallWidgetAppsActionButtons();
+	const appActions = useMediaCallWidgetAppsActionButtons();
 
 	const { data: hasModule = false } = useHasLicenseModule('teams-voip');
 
@@ -33,11 +32,7 @@ const MediaCallProvider = ({ children }: { children: ReactNode }) => {
 		return <MediaCallInstanceContext.Provider value={unauthorizedContextValue}>{children}</MediaCallInstanceContext.Provider>;
 	}
 
-	return (
-		<MediaCallProviderBase>
-			<MediaCallAppActionsProvider {...appsActionButtons}>{children}</MediaCallAppActionsProvider>
-		</MediaCallProviderBase>
-	);
+	return <MediaCallProviderBase appActions={appActions}>{children}</MediaCallProviderBase>;
 };
 
 export default MediaCallProvider;

@@ -21,6 +21,7 @@ import useWidgetPositionTracker from './useWidgetPositionTracker';
 import { useMediaCallInstance } from '../context/MediaCallInstanceContext';
 import MediaCallViewContext from '../context/MediaCallViewContext';
 import type { PeerInfo } from '../context/definitions';
+import { type MediaCallAppActionsContextValue } from '../experimental/AppActionButtons';
 import { stopTracks, useDevicePermissionPrompt2, PermissionRequestCancelledCallRejectedError } from '../hooks/useDevicePermissionPrompt';
 import { isValidTone, useTonePlayer } from '../hooks/useTonePlayer';
 import { MediaCallWidget } from '../views';
@@ -28,6 +29,7 @@ import TransferModal from '../views/TransferModal';
 
 type MediaCallViewProviderProps = {
 	children?: ReactNode;
+	appActions?: MediaCallAppActionsContextValue;
 };
 
 const MediaCallViewProvider = ({ children }: MediaCallViewProviderProps) => {

@@ -1,14 +1,19 @@
 import { ButtonGroup, Divider } from '@rocket.chat/fuselage';
 
 import AppActionButton from './AppActionButton';
-import { useMediaCallAppActions } from '../context/MediaCallAppActionsContext';
+import { useMediaCallInstance, useMediaCallView } from '../../../context';
+import { sessionStateToCallState } from '../context/MediaCallAppActionsContext';
 
 const AppActions = () => {
-	const { actions, handleInteraction } = useMediaCallAppActions();
+	const { sessionState } = useMediaCallView();
+	const { appActions, openRoomId } = useMediaCallInstance();
 
-	if (!actions.length) {
+	if (!appActions) {
 		return null;
 	}
+
+	const currentCallState = sessionStateToCallState(sessionState);
+	const actions = appActions.actions.filter(({ callStates }) => !callStates || callStates.includes(currentCallState));
 
 	return (
 		<>
@@ -20,7 +25,10 @@ const AppActions = () => {
 						actionId={actionId}
 						label={label}
 						variant={variant}
-						handleInteraction={handleInteraction}
+						sessionState={sessionState}
+						currentState={currentCallState}
+						currentRoomId={openRoomId}
+						handleInteraction={appActions.handleInteraction}
 					/>
 				))}
 			</ButtonGroup>

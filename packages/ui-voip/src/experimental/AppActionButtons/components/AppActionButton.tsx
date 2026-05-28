@@ -1,53 +1,59 @@
 import { Button } from '@rocket.chat/fuselage';
 import { useCallback, useState } from 'react';
 
-import { useMediaCallInstance, useMediaCallView } from '../../../context';
-import type { MediaCallAppActionDescriptor, MediaCallAppActionsContextValue } from '../context/MediaCallAppActionsContext';
-import { sessionStateToCallState } from '../providers/MediaCallAppActionsProvider';
+import { type SessionState } from '../../../context';
+import type { MediaCallAppActionDescriptor, MediaCallAppActionsContextValue, MediaCallState } from '../context/MediaCallAppActionsContext';
 
 export type AppActionButtonProps = MediaCallAppActionDescriptor & {
-	key: string;
+	sessionState: SessionState;
+	currentRoomId?: string;
+	currentState: MediaCallState;
 } & Pick<MediaCallAppActionsContextValue, 'handleInteraction'>;
 
-const AppActionButton = ({ appId, actionId, label, variant, handleInteraction }: AppActionButtonProps) => {
-	const { sessionState } = useMediaCallView();
-	const { openRoomId } = useMediaCallInstance();
-
-	const [disabled, setDisabled] = useState(false);
-	const [buttonLabel, setButtonLabel] = useState(label);
-	const [buttonVariant, setButtonVariant] = useState(variant);
-
-	const [currentActionId, setCurrentActionId] = useState(actionId);
+const AppActionButton = ({
+	appId,
+	actionId,
+	label,
+	variant,
+	handleInteraction,
+	sessionState,
+	currentState,
+	currentRoomId,
+}: AppActionButtonProps) => {
+	const [state, setState] = useState({
+		label,
+		variant,
+		actionId,
+		disabled: false,
+	});
 
 	const onClick = useCallback(async () => {
-		setDisabled(true);
+		setState((prevState) => ({ ...prevState, disabled: true }));
 
 		const result = await handleInteraction({
-			button: { appId, actionId: currentActionId },
-			sessionState: { ...sessionState, state: sessionStateToCallState(sessionState), roomId: openRoomId },
+			button: { appId, actionId: state.actionId },
+			sessionState: { ...sessionState, state: currentState, roomId: currentRoomId },
 		});
 
-		setDisabled(result?.update.disabled ?? false);
+		const disabled = result?.update.disabled ?? false;
+
+		setState((prevState) => ({ ...prevState, disabled }));
 
 		if (!result) {
-			setDisabled(false);
 			return;
 		}
 
-		if (result.update.label !== undefined) {
-			setButtonLabel(result.update.label);
-		}
-		if (result.update.variant !== undefined) {
-			setButtonVariant(result.update.variant);
-		}
-		if (result.update.actionId !== undefined) {
-			setCurrentActionId(result.update.actionId);
-		}
-	}, [appId, currentActionId, handleInteraction, openRoomId, sessionState]);
+		setState((prevState) => ({
+			...prevState,
+			...(result.update.label && { label: result.update.label }),
+			...(result.update.variant && { variant: result.update.variant }),
+			...(result.update.actionId && { actionId: result.update.actionId }),
+		}));
+	}, [handleInteraction, appId, state.actionId, sessionState, currentState, currentRoomId]);
 
 	return (
-		<Button danger={buttonVariant === 'danger'} disabled={disabled} onClick={onClick} medium flexGrow={1}>
-			{buttonLabel}
+		<Button danger={state.variant === 'danger'} disabled={state.disabled} onClick={onClick} medium flexGrow={1}>
+			{state.label}
 		</Button>
 	);
 };

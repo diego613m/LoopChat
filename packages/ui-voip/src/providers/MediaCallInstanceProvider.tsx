@@ -8,12 +8,14 @@ import { useGetAutocompleteOptions } from './useGetAutocompleteOptions';
 import { useMediaSessionInstance } from './useMediaSessionInstance';
 import { MediaCallInstanceContext } from '../context/MediaCallInstanceContext';
 import type { Signals } from '../context/MediaCallInstanceContext';
+import type { MediaCallAppActionsContextValue } from '../experimental/AppActionButtons';
 
 type MediaCallInstanceProviderProps = {
 	children: ReactNode;
+	appActions?: MediaCallAppActionsContextValue;
 };
 
-const MediaCallInstanceProvider = ({ children }: MediaCallInstanceProviderProps) => {
+const MediaCallInstanceProvider = ({ children, appActions }: MediaCallInstanceProviderProps) => {
 	const [openRoomId, setOpenRoomId] = useState<string | undefined>(undefined);
 	const [inRoomView, setInRoomView] = useState(false);
 	const user = useUser();
@@ -25,8 +27,18 @@ const MediaCallInstanceProvider = ({ children }: MediaCallInstanceProviderProps)
 	const getAutocompleteOptions = useGetAutocompleteOptions(instance);
 
 	const value = useMemo(
-		() => ({ instance, signalEmitter, audioElement, openRoomId, setOpenRoomId, getAutocompleteOptions, inRoomView, setInRoomView }),
-		[instance, signalEmitter, audioElement, openRoomId, setOpenRoomId, getAutocompleteOptions, inRoomView],
+		() => ({
+			instance,
+			signalEmitter,
+			audioElement,
+			openRoomId,
+			setOpenRoomId,
+			getAutocompleteOptions,
+			inRoomView,
+			setInRoomView,
+			appActions,
+		}),
+		[instance, signalEmitter, audioElement, openRoomId, setOpenRoomId, getAutocompleteOptions, inRoomView, setInRoomView, appActions],
 	);
 
 	return (
