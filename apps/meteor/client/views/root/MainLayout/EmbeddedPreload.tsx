@@ -1,4 +1,4 @@
-import { useEndpoint, useRouter, useUserId } from '@rocket.chat/ui-contexts';
+import { useEndpoint, useMethod, useRouter, useUserId } from '@rocket.chat/ui-contexts';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
 import { useEffect, useMemo } from 'react';
@@ -34,7 +34,7 @@ const EmbeddedPreload = ({ children }: { children: ReactNode }): ReactElement =>
 		return directives.extractOpenRoomParams(router.getRouteParameters());
 	}, [router]);
 
-	const getRoomByTypeAndName = useEndpoint('GET', '/v1/rooms.getByTypeAndName');
+	const getRoomByTypeAndName = useMethod('getRoomByTypeAndName');
 	const getSubscription = useEndpoint('GET', '/v1/subscriptions.getOne');
 
 	const shouldFetch = !!roomParams && !!uid;
@@ -46,7 +46,7 @@ const EmbeddedPreload = ({ children }: { children: ReactNode }): ReactElement =>
 				return null;
 			}
 
-			const { room: roomData } = await getRoomByTypeAndName({ type: roomParams.type, name: roomParams.reference });
+			const roomData = await getRoomByTypeAndName(roomParams.type, roomParams.reference);
 			if (!roomData?._id) {
 				return null;
 			}
