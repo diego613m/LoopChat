@@ -35,6 +35,7 @@ import {
 	isRoomsAutocompleteChannelAndPrivateWithPaginationProps,
 	isRoomsAutocompleteAvailableForTeamsProps,
 	isRoomsSaveRoomSettingsProps,
+	isRoomsGetByTypeAndNameProps,
 	validateBadRequestErrorResponse,
 	validateUnauthorizedErrorResponse,
 	validateForbiddenErrorResponse,
@@ -56,7 +57,7 @@ import { hideRoomMethod } from '../../../../server/methods/hideRoom';
 import { muteUserInRoom } from '../../../../server/methods/muteUserInRoom';
 import { toggleFavoriteMethod } from '../../../../server/methods/toggleFavorite';
 import { unmuteUserInRoom } from '../../../../server/methods/unmuteUserInRoom';
-import { roomsGetMethod } from '../../../../server/publications/room';
+import { getRoomByTypeAndNameMethod, roomsGetMethod } from '../../../../server/publications/room';
 import { canAccessRoomAsync, canAccessRoomIdAsync } from '../../../authorization/server/functions/canAccessRoom';
 import { hasPermissionAsync } from '../../../authorization/server/functions/hasPermission';
 import { stripABACManagedFieldsForAdmin } from '../../../authorization/server/lib/isABACManagedRoom';
@@ -552,6 +553,35 @@ API.v1.get(
 			...(team && { team }),
 			...(parent && { parent }),
 		});
+	},
+);
+
+API.v1.get(
+	'rooms.getByTypeAndName',
+	{
+		authRequired: false,
+		query: isRoomsGetByTypeAndNameProps,
+		response: {
+			200: ajv.compile<{ room: Partial<IRoom> }>({
+				type: 'object',
+				properties: {
+					room: { type: 'object' },
+					success: { type: 'boolean', enum: [true] },
+				},
+				required: ['room', 'success'],
+				additionalProperties: false,
+			}),
+			400: validateBadRequestErrorResponse,
+			401: validateUnauthorizedErrorResponse,
+			403: validateForbiddenErrorResponse,
+		},
+	},
+	async function action() {
+		const { type, name } = this.queryParams;
+
+		const room = await getRoomByTypeAndNameMethod(this.userId ?? null, type, name);
+
+		return API.v1.success({ room });
 	},
 );
 
