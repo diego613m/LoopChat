@@ -1,9 +1,23 @@
+import { useRef } from 'react';
+
 import { OngoingCall, NewCall, IncomingCall, OutgoingCall, IncomingCallTransfer, OutgoingCallTransfer } from '..';
 import OngoingCallWithScreen from './OngoingCallWithScreen';
 import { useMediaCallInstance } from '../../context/MediaCallInstanceContext';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
+import AppActionButtonStatesContext from '../../experimental/AppActionButtons/context/AppActionButtonStatesContext';
+import type { AppActionButtonState } from '../../experimental/AppActionButtons/context/MediaCallAppActionsContext';
 
+/**
+ * MediaCallWidget owns the AppActionButtonStatesContext ref so that button state
+ * (labels, variants, disabled flags mutated by server responses) survives the
+ * view-swaps driven by the call-state machine.  MediaCallWidget itself stays
+ * mounted for the widget's entire lifetime; individual views (NewCall,
+ * OutgoingCall, …) are swapped in and out below it, taking their AppActionButton
+ * instances with them — but the ref here outlasts all of those remounts.
+ */
 const MediaCallWidget = () => {
+	const buttonStatesRef = useRef<Map<string, AppActionButtonState>>(new Map());
+
 	const { inRoomView } = useMediaCallInstance();
 	const {
 		sessionState: { state, hidden, transferredBy, peerInfo, supportedFeatures },
@@ -13,28 +27,30 @@ const MediaCallWidget = () => {
 		return null;
 	}
 
+	let view: React.ReactElement | null;
+
 	switch (state) {
 		case 'ongoing':
 			if ('username' in peerInfo && supportedFeatures.includes('screen-share')) {
-				return <OngoingCallWithScreen />;
+				view = <OngoingCallWithScreen />;
+			} else {
+				view = <OngoingCall />;
 			}
-			return <OngoingCall />;
+			break;
 		case 'new':
-			return <NewCall />;
+			view = <NewCall />;
+			break;
 		case 'ringing':
-			if (transferredBy) {
-				return <IncomingCallTransfer />;
-			}
-			return <IncomingCall />;
+			view = transferredBy ? <IncomingCallTransfer /> : <IncomingCall />;
+			break;
 		case 'calling':
-			if (transferredBy) {
-				return <OutgoingCallTransfer />;
-			}
-			return <OutgoingCall />;
-		case 'closed':
+			view = transferredBy ? <OutgoingCallTransfer /> : <OutgoingCall />;
+			break;
 		default:
-			return null;
+			view = null;
 	}
+
+	return <AppActionButtonStatesContext.Provider value={buttonStatesRef}>{view}</AppActionButtonStatesContext.Provider>;
 };
 
 export default MediaCallWidget;
