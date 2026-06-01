@@ -3,5 +3,5 @@ export type {
 	AppActionUpdate,
 	MediaCallAppActionDescriptor,
 	MediaCallAppActionsContextValue,
-	MediaCallState,
+	MediaCallWidgetState as MediaCallState,
 } from './context/MediaCallAppActionsContext';

@@ -34,12 +34,12 @@ export const IncomingCallCallStateFilterStory: StoryFn<typeof IncomingCall> = ()
 		<MockedMediaCallAppActionsProvider
 			actions={[
 				{ appId: 'app-id', actionId: 'no-change-label', label: 'No filters' },
-				{ appId: 'app-id', actionId: 'change-label', label: 'Filters: new, ringing', callStates: ['new', 'ringing'] },
+				{ appId: 'app-id', actionId: 'change-label', label: 'Filters: ringing', callStates: ['ringing'] },
 				{
 					appId: 'app-id',
 					actionId: 'change-variant',
-					label: 'Filters: new, calling, ringing-transfer',
-					callStates: ['new', 'calling', 'ringing-transfer'],
+					label: 'Filters: calling, ongoing',
+					callStates: ['calling', 'ongoing'],
 				},
 			]}
 		>

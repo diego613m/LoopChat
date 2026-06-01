@@ -119,7 +119,6 @@ export type MediaCallWidgetActionButtonUserInteraction = {
 	actionId: string;
 	payload: {
 		context: 'mediaCallWidgetAction';
-		callState: string;
 		callId?: string;
 		message?: undefined;
 	};

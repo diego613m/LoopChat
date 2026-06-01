@@ -1,5 +1,4 @@
 import type { IRoom } from '@rocket.chat/apps-engine/definition/rooms';
-import type { MediaCallState } from '@rocket.chat/apps-engine/definition/ui';
 import '@rocket.chat/apps-engine/experimental/MediaCallActionButtons';
 
 import type {
@@ -8,11 +7,10 @@ import type {
 } from '../uikit/UIKitIncomingInteractionActionButton';
 
 export interface IUIKitIncomingInteractionActionButtonMediaCallWidget extends IUIKitIncomingInteractionActionButtonBase {
-	room: IRoom;
+	room?: IRoom;
 	payload: {
 		context: 'mediaCallWidgetAction';
-		callState: MediaCallState;
-		callId?: string;
+		callId: string;
 	};
 }
 

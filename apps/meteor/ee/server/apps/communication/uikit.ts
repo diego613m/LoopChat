@@ -320,7 +320,7 @@ export class AppUIKitInteractionApi {
 				} = req.body;
 
 				// Media call widget payload
-				const { callId, callState } = req.body.payload as { callId?: string; callState?: string };
+				const { callId } = req.body.payload as { callId?: string };
 
 				const user = orch.getConverters()?.get('users').convertToApp(req.user);
 				const room = rid ? await orch.getConverters()?.get('rooms').convertById(rid) : undefined;
@@ -339,7 +339,6 @@ export class AppUIKitInteractionApi {
 						context,
 						...(msgText ? { message: msgText } : {}),
 						...(callId ? { callId } : {}),
-						...(callState ? { callState } : {}),
 					},
 				};
 

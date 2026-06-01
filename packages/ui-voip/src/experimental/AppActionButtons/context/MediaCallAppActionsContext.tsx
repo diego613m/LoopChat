@@ -9,14 +9,14 @@ export type AppActionUpdate = {
 	disabled?: boolean;
 };
 
-export type MediaCallState = 'new' | 'calling' | 'calling-transfer' | 'ringing' | 'ringing-transfer' | 'ongoing';
+export type MediaCallWidgetState = 'calling' | 'ringing' | 'ongoing';
 
 export type MediaCallAppActionDescriptor = {
 	appId: string;
 	actionId: string;
 	label: string;
 	variant?: 'danger';
-	callStates?: MediaCallState[];
+	callStates?: MediaCallWidgetState[];
 };
 
 export type MediaCallAppActionsContextValue =
@@ -36,15 +36,3 @@ export const defaultMediaCallAppActionsContextValue: MediaCallAppActionsContextV
 
 export const useMediaCallAppActions = () => useContext(MediaCallInstanceContext).appActions || defaultMediaCallAppActionsContextValue;
 
-export const sessionStateToCallState = (sessionState: SessionState): MediaCallState => {
-	switch (sessionState.state) {
-		case 'calling':
-			return sessionState.transferredBy ? 'calling-transfer' : 'calling';
-		case 'ringing':
-			return sessionState.transferredBy ? 'ringing-transfer' : 'ringing';
-		case 'ongoing':
-			return 'ongoing';
-		default:
-			return 'new';
-	}
-};

@@ -1,4 +1,3 @@
-import type { MediaCallState } from '../definition/ui/IUIActionButtonDescriptor';
 import type { IUIKitResponse } from '../definition/uikit/IUIKitInteractionType';
 import type { IUIKitActionButtonIncomingInteraction } from '../definition/uikit/UIKitIncomingInteractionTypes';
 import type { IUIKitActionButtonMediaCallWidgetIncomingInteraction } from '../definition/uikit/UIKitInteractionContext';
@@ -12,6 +11,8 @@ export declare function isMediaCallWidgetIncomingInteraction(
 
 declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder' {
 	/**
+	 * @experimental
+	 *
 	 * Fields that can be selectively updated on the action button that triggered the interaction.
 	 * At least one field must be provided.
 	 */
@@ -46,11 +47,35 @@ declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionRespon
 }
 
 declare module '@rocket.chat/apps-engine/definition/ui/IUIActionButtonDescriptor' {
-	export type MediaCallState = 'new' | 'calling' | 'calling-transfer' | 'ringing' | 'ringing-transfer' | 'ongoing';
+	/**
+	 * @experimental
+	 *
+	 * Media call widget states that the app can interact with.
+	 *
+	 * Can also be used as a filter when registering an action button
+	 *
+	 * Note: not equivalent to the actual media call state, which is controlled by the server.
+	 */
+	export type MediaCallWidgetState = 'calling' | 'ringing' | 'ongoing';
 
 	export type MediaCallWidgetActionButtonDescriptor = IUIActionButtonDescriptorBase & {
+		/**
+		 * @experimental
+		 *
+		 * This context indicates the button should be displayed in the widget used to manage media calls
+		 */
 		context: 'mediaCallWidgetAction';
-		when?: IUActionButtonWhen & { callStates?: MediaCallState[] };
+		when?: IUActionButtonWhen & {
+			/**
+			 * If provided, the button will only be shown when the widget is in one of the specified states.
+			 * If not provided, the button will be shown in all states.
+			 *
+			 * The 'calling' state corresponds to the user activelly initiating a call.
+			 * The 'ringing' state corresponds to the user receiving a call.
+			 * The 'ongoing' state corresponds to the user being in an active call with others.
+			 */
+			callStates?: MediaCallWidgetState[];
+		};
 	};
 
 	interface IUIActionButtonDescriptorMap {
@@ -60,7 +85,6 @@ declare module '@rocket.chat/apps-engine/definition/ui/IUIActionButtonDescriptor
 
 declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionContext' {
 	export interface IUIKitActionButtonMediaCallWidgetIncomingInteraction extends IUIKitActionButtonIncomingInteraction {
-		callState: MediaCallState;
-		callId?: string;
+		callId: string;
 	}
 }

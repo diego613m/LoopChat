@@ -62,7 +62,6 @@ export const useMediaCallWidgetAppsActionButtons = () => {
 						rid: sessionState.roomId,
 						payload: {
 							context: 'mediaCallWidgetAction',
-							callState: sessionState.state,
 							callId: sessionState.callId,
 						},
 					})

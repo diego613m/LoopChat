@@ -1039,7 +1039,6 @@ export class AppListenerManager {
 							triggerId,
 							user,
 							callId: data.payload.callId,
-							callState: data.payload.callState,
 						})
 						.catch(handleError(method));
 				}

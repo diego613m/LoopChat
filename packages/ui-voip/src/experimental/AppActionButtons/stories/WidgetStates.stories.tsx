@@ -55,21 +55,15 @@ const stateAwareActions: MediaCallAppActionDescriptor[] = [
 	},
 	{
 		appId: 'app-id',
-		actionId: 'new-only',
-		label: 'New call only',
-		callStates: ['new'],
-	},
-	{
-		appId: 'app-id',
 		actionId: 'ringing-states',
 		label: 'Ringing & ringing-transfer',
-		callStates: ['ringing', 'ringing-transfer'],
+		callStates: ['ringing'],
 	},
 	{
 		appId: 'app-id',
 		actionId: 'calling-states',
 		label: 'Calling & calling-transfer',
-		callStates: ['calling', 'calling-transfer'],
+		callStates: ['calling'],
 	},
 	{
 		appId: 'app-id',
@@ -82,7 +76,7 @@ const stateAwareActions: MediaCallAppActionDescriptor[] = [
 		actionId: 'danger-action',
 		label: 'Danger — ringing or ongoing',
 		variant: 'danger',
-		callStates: ['ringing', 'ringing-transfer', 'ongoing'],
+		callStates: ['ringing', 'ongoing'],
 	},
 ];
 
