@@ -1,8 +1,13 @@
-import { createContext, useContext } from 'react';
+import { useContext } from 'react';
 
-import type { SessionState } from '../../../context';
+import { MediaCallInstanceContext, type SessionState } from '../../../context';
 
-export type AppActionUpdate = Partial<Pick<MediaCallAppActionDescriptor, 'actionId' | 'label' | 'variant'>> & { disabled?: boolean };
+export type AppActionUpdate = {
+	actionId?: string;
+	label?: string;
+	variant?: 'default' | 'danger';
+	disabled?: boolean;
+};
 
 export type MediaCallState = 'new' | 'calling' | 'calling-transfer' | 'ringing' | 'ringing-transfer' | 'ongoing';
 
@@ -29,11 +34,7 @@ export const defaultMediaCallAppActionsContextValue: MediaCallAppActionsContextV
 	handleInteraction: Promise.resolve,
 };
 
-const MediaCallAppActionsContext = createContext<MediaCallAppActionsContextValue>(defaultMediaCallAppActionsContextValue);
-
-export const useMediaCallAppActions = () => useContext(MediaCallAppActionsContext);
-
-export default MediaCallAppActionsContext;
+export const useMediaCallAppActions = () => useContext(MediaCallInstanceContext).appActions || defaultMediaCallAppActionsContextValue;
 
 export const sessionStateToCallState = (sessionState: SessionState): MediaCallState => {
 	switch (sessionState.state) {

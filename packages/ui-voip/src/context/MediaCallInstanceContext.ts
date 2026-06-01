@@ -11,7 +11,7 @@ export type Signals = {
 	toggleWidget: { peerInfo?: PeerInfo };
 };
 
-type MediaCallInstanceContextValue = {
+export type MediaCallInstanceContextValue = {
 	instance: MediaSignalingSession | undefined;
 	signalEmitter: Emitter<Signals>;
 	audioElement: RefObject<HTMLAudioElement> | undefined;

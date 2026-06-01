@@ -1,5 +1,4 @@
-export type { MediaCallAppActionsProviderProps } from './providers/MediaCallAppActionsProvider';
-export { default as MediaCallAppActionsProvider } from './providers/MediaCallAppActionsProvider';
+export { default as AppActionOverridesProvider } from './providers/AppActionOverridesProvider';
 export type {
 	AppActionUpdate,
 	MediaCallAppActionDescriptor,
