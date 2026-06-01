@@ -1,11 +1,11 @@
 import { Button, ButtonGroup } from '@rocket.chat/fuselage';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DevicePicker, PeerInfo, Widget, WidgetFooter, WidgetHandle, WidgetHeader, WidgetContent } from '../../components';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
-import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 
-const IncomingCall = () => {
+const IncomingCall = ({ ButtonSlot }: { ButtonSlot?: ReactNode }) => {
 	const { t } = useTranslation();
 
 	const { sessionState, onEndCall, onAccept } = useMediaCallView();
@@ -26,7 +26,7 @@ const IncomingCall = () => {
 				<PeerInfo {...peerInfo} />
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions />
+				{ButtonSlot}
 				<ButtonGroup stretch>
 					<Button medium name='phone' icon='phone-off' danger flexGrow={1} onClick={onEndCall}>
 						{t('Reject')}

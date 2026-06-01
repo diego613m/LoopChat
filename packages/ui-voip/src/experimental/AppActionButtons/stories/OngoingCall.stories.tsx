@@ -3,6 +3,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 
 import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { OngoingCall } from '../../../views';
+import AppActions from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot().buildStoryDecorator();
@@ -23,5 +24,5 @@ export default {
 } satisfies Meta<typeof OngoingCall>;
 
 export const OngoingCallStory: StoryFn<typeof OngoingCall> = () => {
-	return <OngoingCall />;
+	return <OngoingCall ButtonSlot={<AppActions />} />;
 };

@@ -3,6 +3,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 
 import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { NewCall } from '../../../views';
+import AppActions from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
@@ -29,5 +30,5 @@ export default {
 } satisfies Meta<typeof NewCall>;
 
 export const NewCallStory: StoryFn<typeof NewCall> = () => {
-	return <NewCall />;
+	return <NewCall ButtonSlot={<AppActions />} />;
 };

@@ -3,6 +3,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 
 import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { OutgoingCallTransfer } from '../../../views';
+import AppActions from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
@@ -29,5 +30,5 @@ export default {
 } satisfies Meta<typeof OutgoingCallTransfer>;
 
 export const OutgoingCallTransferStory: StoryFn<typeof OutgoingCallTransfer> = () => {
-	return <OutgoingCallTransfer />;
+	return <OutgoingCallTransfer ButtonSlot={<AppActions />} />;
 };

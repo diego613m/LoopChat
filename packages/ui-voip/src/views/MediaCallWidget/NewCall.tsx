@@ -1,4 +1,5 @@
 import { Box, Button, ButtonGroup } from '@rocket.chat/fuselage';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -15,9 +16,8 @@ import {
 import { usePeerAutocomplete } from '../../context';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 import { useWidgetExternalControls } from '../../context/useWidgetExternalControls';
-import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 
-const NewCall = () => {
+const NewCall = ({ ButtonSlot }: { ButtonSlot?: ReactNode }) => {
 	const { t } = useTranslation();
 
 	const { sessionState, onCall, onSelectPeer } = useMediaCallView();
@@ -41,7 +41,7 @@ const NewCall = () => {
 				)}
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions />
+				{ButtonSlot}
 				<ButtonGroup stretch>
 					<DevicePicker secondary />
 					<Button medium icon='phone' success flexGrow={1} onClick={onCall}>
