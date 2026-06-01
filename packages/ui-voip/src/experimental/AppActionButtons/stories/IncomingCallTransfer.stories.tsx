@@ -1,9 +1,7 @@
 import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryFn } from '@storybook/react';
 
-import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { IncomingCallTransfer } from '../../../views';
-import AppActions from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
@@ -16,20 +14,18 @@ const mockedContexts = mockAppRoot()
 	.buildStoryDecorator();
 
 export default {
-	title: 'V2/Experimental/AppActionButtons/Views/IncomingCallTransfer',
+	title: 'Experimental/AppActionButtons/Views/IncomingCallTransfer',
 	component: IncomingCallTransfer,
 	decorators: [
 		mockedContexts,
 		(Story) => (
-			<MockedMediaCallProvider state='ringing' transferredBy='Jason'>
-				<MockedMediaCallAppActionsProvider>
-					<Story />
-				</MockedMediaCallAppActionsProvider>
-			</MockedMediaCallProvider>
+			<MockedMediaCallAppActionsProvider state='ringing' transferredBy='Jason'>
+				<Story />
+			</MockedMediaCallAppActionsProvider>
 		),
 	],
 } satisfies Meta<typeof IncomingCallTransfer>;
 
 export const IncomingCallTransferStory: StoryFn<typeof IncomingCallTransfer> = () => {
-	return <IncomingCallTransfer ButtonSlot={<AppActions />} />;
+	return <IncomingCallTransfer />;
 };

@@ -2,12 +2,12 @@ import { Box, Button, ButtonGroup, Tag } from '@rocket.chat/fuselage';
 import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryObj } from '@storybook/react';
 
-import { useMediaCallView } from '../../../context';
-import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
+import { useMediaCallView, useWidgetExternalControls } from '../../../context';
 import { MediaCallWidget } from '../../../views';
 import type { MediaCallAppActionDescriptor } from '../context/MediaCallAppActionsContext';
-import type { MediaCallAppActionsProviderProps } from '../providers/MediaCallAppActionsProvider';
-import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
+import MockedMediaCallAppActionsProvider, {
+	type MockedMediaCallAppActionsProviderProps,
+} from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
 	.withTranslations('en', 'core', {
@@ -86,10 +86,10 @@ const stateAwareActions: MediaCallAppActionDescriptor[] = [
 	},
 ];
 
-const handleInteraction: MediaCallAppActionsProviderProps['handleInteraction'] = async ({ button, sessionState }) => {
+const handleInteraction: MockedMediaCallAppActionsProviderProps['handleInteraction'] = async ({ button, sessionState }) => {
 	switch (button.actionId) {
 		case 'always-visible':
-			return { update: { label: `Clicked in state ${sessionState.state}` } };
+			return { update: { label: `Clicked in state ${sessionState.state}`, actionId: 'default' } };
 		case 'new-only':
 		case 'ringing-states':
 		case 'calling-states':
@@ -113,27 +113,28 @@ type StoryArgs = {
  */
 const StateControls = () => {
 	const { sessionState, onCall } = useMediaCallView();
+	const { toggleWidget } = useWidgetExternalControls();
 	const { state } = sessionState;
 
 	return (
-		<Box display='flex' alignItems='center' mbe={16} gap={8}>
+		<Box display='flex' flexDirection='column' alignItems='flex-start' mbe={16} gap={8}>
 			<Box color='hint' fontScale='c1'>
-				Current state:
+				Current state: <Tag>{state}</Tag>
 			</Box>
-			<Tag>{state}</Tag>
-			{state === 'closed' && (
-				<ButtonGroup>
-					<Button small onClick={() => void onCall()}>
-						Receive call (→ ringing)
-					</Button>
-				</ButtonGroup>
-			)}
+			<ButtonGroup vertical>
+				<Button small onClick={() => void onCall()}>
+					Receive call (→ ringing)
+				</Button>
+				<Button small onClick={() => toggleWidget()} disabled={state !== 'new' && state !== 'closed'}>
+					Toggle widget
+				</Button>
+			</ButtonGroup>
 		</Box>
 	);
 };
 
 const meta = {
-	title: 'V2/Experimental/AppActionButtons/StateTransitions',
+	title: 'Experimental/AppActionButtons/WidgetStates',
 	component: MediaCallWidget,
 	args: {
 		state: 'new',
@@ -154,11 +155,15 @@ const meta = {
 		(Story, { args }) => (
 			// key forces a full remount whenever the initial-state arg changes,
 			// so the widget always starts fresh from the selected state.
-			<MockedMediaCallProvider key={`${args.state}-${args.transferredBy}`} state={args.state} transferredBy={args.transferredBy}>
-				<MockedMediaCallAppActionsProvider actions={stateAwareActions} handleInteraction={handleInteraction}>
-					<Story />
-				</MockedMediaCallAppActionsProvider>
-			</MockedMediaCallProvider>
+			<MockedMediaCallAppActionsProvider
+				actions={stateAwareActions}
+				handleInteraction={handleInteraction}
+				key={`${args.state}-${args.transferredBy}`}
+				state={args.state}
+				transferredBy={args.transferredBy}
+			>
+				<Story />
+			</MockedMediaCallAppActionsProvider>
 		),
 	],
 } satisfies Meta<StoryArgs>;

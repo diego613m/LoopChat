@@ -1,9 +1,7 @@
 import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryFn } from '@storybook/react';
 
-import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { NewCall } from '../../../views';
-import AppActions from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
@@ -15,20 +13,18 @@ const mockedContexts = mockAppRoot()
 	.buildStoryDecorator();
 
 export default {
-	title: 'V2/Experimental/AppActionButtons/Views/NewCall',
+	title: 'Experimental/AppActionButtons/Views/NewCall',
 	component: NewCall,
 	decorators: [
 		mockedContexts,
 		(Story) => (
-			<MockedMediaCallProvider state='new'>
-				<MockedMediaCallAppActionsProvider>
-					<Story />
-				</MockedMediaCallAppActionsProvider>
-			</MockedMediaCallProvider>
+			<MockedMediaCallAppActionsProvider state='new'>
+				<Story />
+			</MockedMediaCallAppActionsProvider>
 		),
 	],
 } satisfies Meta<typeof NewCall>;
 
 export const NewCallStory: StoryFn<typeof NewCall> = () => {
-	return <NewCall ButtonSlot={<AppActions />} />;
+	return <NewCall />;
 };

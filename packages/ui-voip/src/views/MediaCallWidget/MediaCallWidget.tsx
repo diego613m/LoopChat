@@ -2,7 +2,6 @@ import { OngoingCall, NewCall, IncomingCall, OutgoingCall, IncomingCallTransfer,
 import OngoingCallWithScreen from './OngoingCallWithScreen';
 import { useMediaCallInstance } from '../../context/MediaCallInstanceContext';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
-import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 
 const MediaCallWidget = () => {
 	const { inRoomView } = useMediaCallInstance();
@@ -14,26 +13,24 @@ const MediaCallWidget = () => {
 		return null;
 	}
 
-	const RenderedAppActionsButtonGroup = <AppActions />;
-
 	switch (state) {
 		case 'ongoing':
 			if ('username' in peerInfo && supportedFeatures.includes('screen-share')) {
 				return <OngoingCallWithScreen />;
 			}
-			return <OngoingCall ButtonSlot={RenderedAppActionsButtonGroup} />;
+			return <OngoingCall />;
 		case 'new':
-			return <NewCall ButtonSlot={RenderedAppActionsButtonGroup} />;
+			return <NewCall />;
 		case 'ringing':
 			if (transferredBy) {
-				return <IncomingCallTransfer ButtonSlot={RenderedAppActionsButtonGroup} />;
+				return <IncomingCallTransfer />;
 			}
-			return <IncomingCall ButtonSlot={RenderedAppActionsButtonGroup} />;
+			return <IncomingCall />;
 		case 'calling':
 			if (transferredBy) {
-				return <OutgoingCallTransfer ButtonSlot={RenderedAppActionsButtonGroup} />;
+				return <OutgoingCallTransfer />;
 			}
-			return <OutgoingCall ButtonSlot={RenderedAppActionsButtonGroup} />;
+			return <OutgoingCall />;
 		case 'closed':
 		default:
 			return null;
