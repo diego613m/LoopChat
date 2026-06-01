@@ -4,17 +4,6 @@ import type { SessionState } from '../../../context';
 
 export type AppActionUpdate = Partial<Pick<MediaCallAppActionDescriptor, 'actionId' | 'label' | 'variant'>> & { disabled?: boolean };
 
-/**
- * The mutable state of a single app action button, persisted across widget view
- * transitions (e.g. NewCall → OutgoingCall) via AppActionButtonStatesContext.
- */
-export type AppActionButtonState = {
-	label: string;
-	variant?: 'danger';
-	actionId: string;
-	disabled: boolean;
-};
-
 export type MediaCallState = 'new' | 'calling' | 'calling-transfer' | 'ringing' | 'ringing-transfer' | 'ongoing';
 
 export type MediaCallAppActionDescriptor = {
