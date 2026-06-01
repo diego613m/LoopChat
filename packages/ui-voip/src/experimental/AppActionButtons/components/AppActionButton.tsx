@@ -2,15 +2,24 @@ import { Button } from '@rocket.chat/fuselage';
 import { useCallback, useState } from 'react';
 
 import { type SessionState } from '../../../context';
-import type { MediaCallAppActionDescriptor, MediaCallAppActionsContextValue, MediaCallState } from '../context/MediaCallAppActionsContext';
+import type {
+	AppActionUpdate,
+	MediaCallAppActionDescriptor,
+	MediaCallAppActionsContextValue,
+	MediaCallState,
+} from '../context/MediaCallAppActionsContext';
 
-export type AppActionButtonProps = MediaCallAppActionDescriptor & {
+export type AppActionButtonProps = {
+	buttonKey: string;
 	sessionState: SessionState;
 	currentRoomId?: string;
 	currentState: MediaCallState;
-} & Pick<MediaCallAppActionsContextValue, 'handleInteraction'>;
+} & Pick<MediaCallAppActionDescriptor, 'appId' | 'actionId'> &
+	AppActionUpdate &
+	Pick<MediaCallAppActionsContextValue, 'handleInteraction'>;
 
 const AppActionButton = ({
+	buttonKey,
 	appId,
 	actionId,
 	label,
@@ -20,40 +29,25 @@ const AppActionButton = ({
 	currentState,
 	currentRoomId,
 }: AppActionButtonProps) => {
-	const [state, setState] = useState({
-		label,
-		variant,
-		actionId,
-		disabled: false,
-	});
+	// Only transient click state lives here. All persistent updates (label,
+	// variant, actionId) are written back to AppActionOverridesContext by
+	// AppActions so they survive widget-state transitions and remounts.
+	const [disabled, setDisabled] = useState(false);
 
 	const onClick = useCallback(async () => {
-		setState((prevState) => ({ ...prevState, disabled: true }));
+		setDisabled(true);
 
 		const result = await handleInteraction({
-			button: { appId, actionId: state.actionId },
+			button: { key: buttonKey, appId, actionId } as Pick<MediaCallAppActionDescriptor, 'appId' | 'actionId'>,
 			sessionState: { ...sessionState, state: currentState, roomId: currentRoomId },
 		});
 
-		const disabled = result?.update.disabled ?? false;
-
-		setState((prevState) => ({ ...prevState, disabled }));
-
-		if (!result) {
-			return;
-		}
-
-		setState((prevState) => ({
-			...prevState,
-			...(result.update.label && { label: result.update.label }),
-			...(result.update.variant && { variant: result.update.variant }),
-			...(result.update.actionId && { actionId: result.update.actionId }),
-		}));
-	}, [handleInteraction, appId, state.actionId, sessionState, currentState, currentRoomId]);
+		setDisabled(result?.update.disabled ?? false);
+	}, [handleInteraction, buttonKey, appId, actionId, sessionState, currentState, currentRoomId]);
 
 	return (
-		<Button danger={state.variant === 'danger'} disabled={state.disabled} onClick={onClick} medium flexGrow={1}>
-			{state.label}
+		<Button danger={variant === 'danger'} disabled={disabled} onClick={onClick} medium flexGrow={1}>
+			{label}
 		</Button>
 	);
 };

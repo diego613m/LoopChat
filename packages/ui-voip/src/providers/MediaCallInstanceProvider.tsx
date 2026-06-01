@@ -9,6 +9,7 @@ import { useMediaSessionInstance } from './useMediaSessionInstance';
 import { MediaCallInstanceContext } from '../context/MediaCallInstanceContext';
 import type { Signals } from '../context/MediaCallInstanceContext';
 import type { MediaCallAppActionsContextValue } from '../experimental/AppActionButtons';
+import AppActionOverridesProvider from '../experimental/AppActionButtons/providers/AppActionOverridesProvider';
 
 type MediaCallInstanceProviderProps = {
 	children: ReactNode;
@@ -43,13 +44,15 @@ const MediaCallInstanceProvider = ({ children, appActions }: MediaCallInstancePr
 
 	return (
 		<MediaCallInstanceContext.Provider value={value}>
-			{createPortal(
-				<audio ref={remoteStreamRefCallback}>
-					<track kind='captions' />
-				</audio>,
-				document.body,
-			)}
-			{children}
+			<AppActionOverridesProvider>
+				{createPortal(
+					<audio ref={remoteStreamRefCallback}>
+						<track kind='captions' />
+					</audio>,
+					document.body,
+				)}
+				{children}
+			</AppActionOverridesProvider>
 		</MediaCallInstanceContext.Provider>
 	);
 };
