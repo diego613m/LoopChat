@@ -1,4 +1,5 @@
-import { Box } from '@rocket.chat/fuselage';
+import type { IUser } from '@rocket.chat/core-typings';
+import { Box, Icon } from '@rocket.chat/fuselage';
 import type { GenericMenuItemProps } from '@rocket.chat/ui-client';
 import { clientCallbacks } from '@rocket.chat/ui-client';
 import { useEndpoint, useSetting } from '@rocket.chat/ui-contexts';
@@ -9,12 +10,13 @@ import { useTranslation } from 'react-i18next';
 import { useCustomStatusModalHandler } from './useCustomStatusModalHandler';
 import MarkdownText from '../../../../components/MarkdownText';
 import { UserStatus } from '../../../../components/UserStatus';
+import { useExpirationText } from '../../../../components/UserStatusText';
 import { useFireGlobalEvent } from '../../../../hooks/useFireGlobalEvent';
 import { userStatuses } from '../../../../lib/userStatuses';
 import type { UserStatusDescriptor } from '../../../../lib/userStatuses';
 import { useStatusDisabledModal } from '../../../../views/admin/customUserStatus/hooks/useStatusDisabledModal';
 
-export const useStatusItems = (): GenericMenuItemProps[] => {
+export const useStatusItems = (user?: IUser): GenericMenuItemProps[] => {
 	// We should lift this up to somewhere else if we want to use it in other places
 
 	userStatuses.invisibleAllowed = useSetting('Accounts_AllowInvisibleStatusOption', true);
@@ -50,41 +52,63 @@ export const useStatusItems = (): GenericMenuItemProps[] => {
 			return Array.from(userStatuses);
 		},
 		staleTime: Infinity,
-		select: (statuses) =>
-			statuses.map((status): GenericMenuItemProps => {
-				const content = status.localizeName ? t(status.name) : status.name;
-				return {
-					id: status.id,
-					status: <UserStatus status={status.statusType} />,
-					content: <MarkdownText content={content} parseEmoji={true} variant='inline' />,
-					disabled: presenceDisabled,
-					onClick: () => setStatusMutation.mutate(status),
-				};
-			}),
 	});
 
 	const handleStatusDisabledModal = useStatusDisabledModal();
 	const handleCustomStatus = useCustomStatusModalHandler();
+	const customStatusExpiration = useExpirationText(user?.statusExpiresAt);
 
-	return [
-		...(presenceDisabled
-			? [
-					{
-						id: 'presence-disabled',
-						content: (
-							<Box fontScale='p2'>
-								<Box mbe={4} wordBreak='break-word' style={{ whiteSpace: 'normal' }}>
-									{t('User_status_disabled')}
+	if (presenceDisabled) {
+		return [
+			{
+				id: 'presence-disabled',
+				content: (
+					<Box fontScale='p2'>
+						<Box mbe={4} wordBreak='break-word' style={{ whiteSpace: 'normal' }}>
+							{t('User_status_disabled')}
+						</Box>
+						<Box is='a' color='info' onClick={handleStatusDisabledModal}>
+							{t('Learn_more')}
+						</Box>
+					</Box>
+				),
+			},
+		];
+	}
+
+	const customStatusItem: GenericMenuItemProps = {
+		id: 'custom-status',
+		onClick: handleCustomStatus,
+		...(user?.statusText
+			? {
+					status: <UserStatus status={user.status} />,
+					content: (
+						<Box display='flex' flexDirection='column' rowGap={4}>
+							<MarkdownText content={user.statusText} parseEmoji variant='inline' />
+							{customStatusExpiration && (
+								<Box color='secondary-info' display='flex' alignItems='center'>
+									<Icon name='clock' size='x16' mie={4} />
+									{customStatusExpiration}
 								</Box>
-								<Box is='a' color='info' onClick={handleStatusDisabledModal}>
-									{t('Learn_more')}
-								</Box>
-							</Box>
-						),
-					},
-				]
-			: []),
-		...(statuses ?? []),
-		{ id: 'custom-status', icon: 'emoji', content: t('Custom_Status'), onClick: handleCustomStatus, disabled: presenceDisabled },
-	];
+							)}
+						</Box>
+					),
+					addon: <Icon name='edit' size='x16' />,
+				}
+			: {
+					icon: 'edit',
+					content: t('Custom_Status'),
+				}),
+	};
+
+	const presenceItems = (statuses ?? []).map(
+		(status): GenericMenuItemProps => ({
+			id: status.id,
+			status: <UserStatus status={status.statusType} />,
+			content: <MarkdownText content={status.localizeName ? t(status.name) : status.name} parseEmoji variant='inline' />,
+			onClick: () => setStatusMutation.mutate(status),
+		}),
+	);
+
+	return [customStatusItem, ...presenceItems];
 };

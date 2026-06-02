@@ -35,11 +35,7 @@ const UserStatusText = ({ statusText, statusExpiresAt, showExpiration: showExpir
 	return (
 		<Box ref={ref} data-tooltip='' onMouseEnter={handleMouseEnter} onMouseLeave={closeTooltip}>
 			<MarkdownText content={statusText} parseEmoji={true} variant='inlineWithoutBreaks' withTruncatedText />
-			{showExpiration && hasValidExpiration && (
-				<Box color='hint' fontScale='c1'>
-					{expirationText}
-				</Box>
-			)}
+			{showExpiration && hasValidExpiration && <Box color='secondary-info'>{expirationText}</Box>}
 		</Box>
 	);
 };

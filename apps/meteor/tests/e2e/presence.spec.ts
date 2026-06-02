@@ -2,16 +2,18 @@ import { faker } from '@faker-js/faker';
 
 import { DEFAULT_USER_CREDENTIALS } from './config/constants';
 import { Users } from './fixtures/userStates';
-import { HomeChannel, Login } from './page-objects';
+import { AccountProfile, HomeChannel, Login } from './page-objects';
 import { test, expect } from './utils/test';
 
 test.describe.serial('Presence', () => {
 	let poLogin: Login;
 	let poHomeChannel: HomeChannel;
+	let poAccountProfile: AccountProfile;
 
 	test.beforeEach(async ({ page }) => {
 		poLogin = new Login(page);
 		poHomeChannel = new HomeChannel(page);
+		poAccountProfile = new AccountProfile(page);
 
 		await page.goto('/home');
 	});
@@ -71,6 +73,28 @@ test.describe.serial('Presence', () => {
 			await test.step('save without changes', async () => {
 				await poHomeChannel.navbar.changeUserCustomStatus();
 				expect(await page.evaluate(() => localStorage.getItem('fuselage-localStorage-Local_Custom_Status'))).not.toBe('undefined');
+			});
+		});
+
+		test('should replace Custom Status button with active status row when a custom status is set', async ({ page }) => {
+			const text = faker.string.alpha(8);
+
+			await test.step('Custom Status entry visible while no status is set', async () => {
+				await poHomeChannel.navbar.btnUserMenu.click();
+				await expect(poHomeChannel.navbar.userMenu.getByRole('menuitemcheckbox', { name: 'Custom Status' })).toBeVisible();
+				await page.keyboard.press('Escape');
+			});
+
+			await test.step('after setting a status, Custom Status entry is replaced by the active row', async () => {
+				await poHomeChannel.navbar.changeUserCustomStatus(text);
+				await poHomeChannel.navbar.btnUserMenu.click();
+				await expect(poHomeChannel.navbar.userMenu.getByRole('menuitemcheckbox', { name: 'Custom Status' })).not.toBeVisible();
+				await expect(poHomeChannel.navbar.userMenu).toContainText(text);
+				await page.keyboard.press('Escape');
+			});
+
+			await test.step('cleanup', async () => {
+				await poHomeChannel.navbar.changeUserCustomStatus('');
 			});
 		});
 	});
@@ -176,6 +200,33 @@ test.describe.serial('Presence', () => {
 				await poHomeChannel.navbar.btnUserMenu.click();
 				await expect(poHomeChannel.navbar.userMenu).not.toContainText('Until');
 				await expect(poHomeChannel.navbar.userMenu).not.toContainText('focus time');
+			});
+		});
+	});
+
+	test.describe('Status set from account profile', () => {
+		test.use({ storageState: Users.admin.state });
+
+		test('should save status with expiration from the profile form and surface it in the user menu', async ({ page }) => {
+			const text = faker.string.alpha(10);
+
+			await test.step('fill Status field + Clear-after on /account/profile and save', async () => {
+				await page.goto('/account/profile');
+				await poAccountProfile.inputStatusText.fill(text);
+				await poAccountProfile.chooseClearStatusAfter('30 minutes');
+				await poAccountProfile.btnSaveChanges.click();
+			});
+
+			await test.step('status with expiration appears in user menu', async () => {
+				await page.goto('/home');
+				await poHomeChannel.navbar.btnUserMenu.click();
+				await expect(poHomeChannel.navbar.userMenu).toContainText(text);
+				await expect(poHomeChannel.navbar.userMenu).toContainText('Until');
+				await page.keyboard.press('Escape');
+			});
+
+			await test.step('cleanup', async () => {
+				await poHomeChannel.navbar.changeUserCustomStatus('');
 			});
 		});
 	});

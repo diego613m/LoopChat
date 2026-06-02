@@ -51,7 +51,11 @@ const RoomMembersItem = ({
 	const [nameOrUsername, displayUsername] = getUserDisplayNames(name, username, useRealName);
 
 	const presenceData = useUserPresence(_id);
-	const { handleMouseEnter, handleMouseLeave } = useStatusTooltip(presenceData?.statusText, presenceData?.statusExpiresAt, presenceData?.status);
+	const { handleMouseEnter, handleMouseLeave } = useStatusTooltip(
+		presenceData?.statusText,
+		presenceData?.statusExpiresAt,
+		presenceData?.status,
+	);
 
 	const handleMenuEvent = isReduceMotionEnabled
 		? {

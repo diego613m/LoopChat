@@ -1,4 +1,4 @@
-import { Box } from '@rocket.chat/fuselage';
+import { Box, Icon } from '@rocket.chat/fuselage';
 import { useTooltipOpen, useTooltipClose } from '@rocket.chat/ui-contexts';
 import type { MouseEvent } from 'react';
 import { useCallback } from 'react';
@@ -30,7 +30,8 @@ export function useStatusTooltip(statusText?: string, statusExpiresAt?: Date | s
 				<Box>
 					<Box fontScale='p2'>{headline}</Box>
 					{expirationText && (
-						<Box fontScale='c1' color='hint'>
+						<Box color='secondary-info' display='flex' alignItems='center'>
+							<Icon name='clock' size='x16' mie={4} />
 							{expirationText}
 						</Box>
 					)}

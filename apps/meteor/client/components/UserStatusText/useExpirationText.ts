@@ -1,3 +1,4 @@
+import { useLanguage } from '@rocket.chat/ui-contexts';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -33,6 +34,7 @@ function isSameDay(a: Date, b: Date): boolean {
 
 export function useExpirationText(statusExpiresAt?: Date | string): string | undefined {
 	const { t } = useTranslation();
+	const language = useLanguage();
 	const formatTime = useFormatTime();
 	const formatDate = useFormatDate();
 
@@ -42,7 +44,15 @@ export function useExpirationText(statusExpiresAt?: Date | string): string | und
 			return undefined;
 		}
 
-		const isToday = isSameDay(expiresAt, new Date());
-		return `${t('Until')} ${isToday ? formatTime(expiresAt) : formatDate(expiresAt)}`;
-	}, [statusExpiresAt, t, formatTime, formatDate]);
+		const now = new Date();
+		if (isSameDay(expiresAt, now)) {
+			return `${t('Until')} ${formatTime(expiresAt)}`;
+		}
+
+		if (expiresAt.getFullYear() === now.getFullYear()) {
+			return `${t('Until')} ${new Intl.DateTimeFormat(language, { month: 'long', day: 'numeric' }).format(expiresAt)}`;
+		}
+
+		return `${t('Until')} ${formatDate(expiresAt)}`;
+	}, [statusExpiresAt, t, language, formatTime, formatDate]);
 }

@@ -10,13 +10,11 @@ import {
 	TextInput,
 	InputBox,
 	Select,
-	Callout,
 	Margins,
 	Modal,
 	Button,
 	Box,
 	ModalHeader,
-	ModalIcon,
 	ModalTitle,
 	ModalClose,
 	ModalContent,
@@ -25,53 +23,17 @@ import {
 } from '@rocket.chat/fuselage';
 import { useEffectEvent, useLocalStorage } from '@rocket.chat/fuselage-hooks';
 import { useToastMessageDispatch, useSetting, useEndpoint, useUser } from '@rocket.chat/ui-contexts';
-import type { TFunction } from 'i18next';
 import type { ReactElement, ChangeEvent, ComponentProps, FormEvent } from 'react';
 import { useState, useCallback, useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import MarkdownText from '../../../components/MarkdownText';
-import { UserStatus } from '../../../components/UserStatus';
 import UserStatusMenu from '../../../components/UserStatusMenu';
-import { useExpirationText } from '../../../components/UserStatusText';
-import { useFormatTime } from '../../../hooks/useFormatTime';
 import { USER_STATUS_TEXT_MAX_LENGTH } from '../../../lib/constants';
+import { STATUS_DURATION_OPTIONS } from '../../../lib/statusDurations';
 
 type EditStatusModalProps = {
 	onClose: () => void;
 };
-
-type DurationOption = {
-	value: string;
-	getLabel: (t: TFunction, formatTime: (d: Date) => string, now: Date) => string;
-	getExpiresAt?: (now: Date) => Date;
-};
-
-const DURATION_OPTIONS: DurationOption[] = [
-	{ value: '', getLabel: (t) => t('Status_dont_clear') },
-	{
-		value: '30',
-		getLabel: (t, formatTime, now) => `${t('Status_30_minutes')} (${formatTime(new Date(now.getTime() + 30 * 60_000))})`,
-		getExpiresAt: (now) => new Date(now.getTime() + 30 * 60_000),
-	},
-	{
-		value: '60',
-		getLabel: (t, formatTime, now) => `${t('Status_1_hour')} (${formatTime(new Date(now.getTime() + 60 * 60_000))})`,
-		getExpiresAt: (now) => new Date(now.getTime() + 60 * 60_000),
-	},
-	{
-		value: '240',
-		getLabel: (t, formatTime, now) => `${t('Status_4_hours')} (${formatTime(new Date(now.getTime() + 240 * 60_000))})`,
-		getExpiresAt: (now) => new Date(now.getTime() + 240 * 60_000),
-	},
-	{
-		value: 'today',
-		getLabel: (t, formatTime, now) =>
-			`${t('Today')} (${formatTime(new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999))})`,
-		getExpiresAt: (now) => new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999),
-	},
-	{ value: 'custom', getLabel: (t) => t('Status_choose_date_and_time') },
-];
 
 const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 	const user = useUser();
@@ -89,34 +51,12 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 	const [duration, setDuration] = useState('');
 	const [customDate, setCustomDate] = useState(() => new Date().toLocaleDateString('en-CA'));
 	const [customTime, setCustomTime] = useState(() => new Date().toTimeString().slice(0, 5));
-	const minCustomDate = useMemo(() => new Date().toLocaleDateString('en-CA'), []);
 
 	const setUserStatus = useEndpoint('POST', '/v1/users.setStatus');
-	const formatTime = useFormatTime();
 
-	const currentStatusText = user?.statusText || t(user?.status ?? 'offline');
-	const expirationText = useExpirationText(user?.statusExpiresAt);
 	const defaultStatusLabel = `${t(statusType)} (${t('Default')})`;
 
-	const durationOptions: SelectOption[] = useMemo(
-		() => DURATION_OPTIONS.map(({ value, getLabel }) => [value, getLabel(t, formatTime, new Date())]),
-		[t, formatTime],
-	);
-
-	const computeExpiresAt = useCallback((): Date | undefined => {
-		if (duration === 'custom') {
-			if (!customDate || !customTime) {
-				return undefined;
-			}
-			const [year, month, day] = customDate.split('-').map(Number);
-			const [hours, mins] = customTime.split(':').map(Number);
-			const parsedDate = new Date(year, month - 1, day, hours, mins, 0, 0);
-			return Number.isNaN(parsedDate.getTime()) ? undefined : parsedDate;
-		}
-
-		const option = DURATION_OPTIONS.find((o) => o.value === duration);
-		return option?.getExpiresAt?.(new Date());
-	}, [duration, customDate, customTime]);
+	const durationOptions: SelectOption[] = useMemo(() => STATUS_DURATION_OPTIONS.map(({ value, labelKey }) => [value, t(labelKey)]), [t]);
 
 	const handleStatusText = useEffectEvent((e: ChangeEvent<HTMLInputElement>): void => {
 		const { value } = e.currentTarget;
@@ -128,14 +68,20 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 
 	const handleSaveStatus = useCallback(async () => {
 		try {
-			const expiresAt = computeExpiresAt();
-			if (duration === 'custom' && !expiresAt) {
-				setDurationError(t('Status_choose_date_and_time'));
-				return;
-			}
-			if (duration === 'custom' && expiresAt && expiresAt <= new Date()) {
-				setDurationError(t('Status_expiration_must_be_future'));
-				return;
+			const expiresAt = STATUS_DURATION_OPTIONS.find((o) => o.value === duration)?.getExpiresAt?.({
+				now: new Date(),
+				customDate,
+				customTime,
+			});
+			if (duration === 'custom') {
+				if (!expiresAt) {
+					setDurationError(t('Status_choose_date_and_time'));
+					return;
+				}
+				if (expiresAt <= new Date()) {
+					setDurationError(t('Status_expiration_must_be_future'));
+					return;
+				}
 			}
 			setDurationError(undefined);
 			await setUserStatus({
@@ -149,7 +95,7 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
 		}
-	}, [onClose, setUserStatus, statusText, statusType, computeExpiresAt, setCustomStatus, dispatchToastMessage, t, duration]);
+	}, [onClose, setUserStatus, statusText, statusType, duration, customDate, customTime, setCustomStatus, dispatchToastMessage, t]);
 
 	return (
 		<Modal
@@ -166,26 +112,11 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 			)}
 		>
 			<ModalHeader>
-				<ModalIcon name='info' />
 				<ModalTitle id={`${modalId}-title`}>{t('Status_set_your_status')}</ModalTitle>
 				<ModalClose onClick={onClose} />
 			</ModalHeader>
 			<ModalContent fontScale='p2'>
 				<Box display='flex' flexDirection='column' rowGap={12}>
-					<Field>
-						<FieldLabel>{t('Status_current')}</FieldLabel>
-						<Box display='flex' alignItems='center' mbs={8}>
-							<UserStatus status={user?.status} />
-							<Box mis={8}>
-								<MarkdownText content={currentStatusText} parseEmoji variant='inlineWithoutBreaks' />
-								{expirationText && (
-									<Box color='hint' fontScale='c1'>
-										{expirationText}
-									</Box>
-								)}
-							</Box>
-						</Box>
-					</Field>
 					<Field>
 						<FieldLabel htmlFor={`${modalId}-status-message`}>{t('Status')}</FieldLabel>
 						<FieldRow>
@@ -227,7 +158,7 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 							<Box display='flex' mi='neg-x4' mbs={8}>
 								<Margins inline={4}>
 									<InputBox
-										aria-label='Expiration date'
+										aria-label={t('Status_expiration_date')}
 										type='date'
 										flexGrow={1}
 										value={customDate}
@@ -235,10 +166,10 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 											setCustomDate(e.currentTarget.value);
 											setDurationError(undefined);
 										}}
-										min={minCustomDate}
+										min={new Date().toLocaleDateString('en-CA')}
 									/>
 									<InputBox
-										aria-label='Expiration time'
+										aria-label={t('Status_expiration_time')}
 										type='time'
 										flexGrow={1}
 										value={customTime}
@@ -251,8 +182,8 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 							</Box>
 						)}
 						{durationError && <FieldError>{durationError}</FieldError>}
+						<FieldHint>{t('Status_new_status_warning')}</FieldHint>
 					</Field>
-					<Callout type='info'>{t('Status_new_status_warning')}</Callout>
 				</Box>
 			</ModalContent>
 			<ModalFooter>

@@ -239,8 +239,7 @@ export class Navbar {
 	}
 
 	async changeUserCustomStatus(text?: string): Promise<void> {
-		await this.btnUserMenu.click();
-		await this.getUserProfileMenuOption('Custom Status').click();
+		await this.openEditStatusModal();
 		await this.modals.editStatus.changeStatusMessage(text);
 	}
 
@@ -250,7 +249,7 @@ export class Navbar {
 
 	async openEditStatusModal(): Promise<void> {
 		await this.btnUserMenu.click();
-		await this.getUserProfileMenuOption('Custom Status').click();
+		await this.userMenu.getByRole('menuitemcheckbox').first().click();
 	}
 
 	async changeUserCustomStatusWithExpiration(options: {

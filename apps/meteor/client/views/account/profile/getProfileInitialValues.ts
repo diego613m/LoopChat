@@ -9,7 +9,7 @@ export type AccountProfileFormValues = {
 	avatar: AvatarObject;
 	url: string;
 	statusText: string;
-	statusType: string;
+	statusType: IUser['status'];
 	bio: string;
 	customFields: Record<string, string>;
 	nickname: string;
@@ -22,7 +22,7 @@ export const getProfileInitialValues = (user: IUser | null): AccountProfileFormV
 	avatar: '' as AvatarObject,
 	url: '',
 	statusText: user?.statusText ?? '',
-	statusType: user?.status ?? '',
+	statusType: user?.status,
 	bio: user?.bio ?? '',
 	customFields: user?.customFields ?? {},
 	nickname: user?.nickname ?? '',

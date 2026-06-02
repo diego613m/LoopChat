@@ -19,12 +19,15 @@ const UserMenu = function UserMenu({ user, ...props }: UserMenuProps) {
 
 	const handleAction = useHandleMenuAction(items, () => setIsOpen(false));
 
+	// TODO: highlight the active status row once fuselage's MenuItem forwards
+	// `selected={state.selectionManager.isSelected(item.key)}` to MenuOption.
 	return (
 		<GenericMenu
 			{...props}
 			is={UserMenuButton}
 			placement='bottom-end'
 			selectionMode='multiple'
+			// selectedKeys={selectedKeys}
 			sections={sections}
 			title={t('User_menu')}
 			onAction={handleAction}

@@ -1,7 +1,7 @@
 import { VisuallyHidden } from '@react-aria/visually-hidden';
-import type { IUser } from '@rocket.chat/core-typings';
 import { css } from '@rocket.chat/css-in-js';
-import { Box, Button, Icon } from '@rocket.chat/fuselage';
+import type { SelectOption } from '@rocket.chat/fuselage';
+import { Box, Button, Divider, Icon, InputBox, Margins, Select } from '@rocket.chat/fuselage';
 import { Field, FieldGroup, FieldLabel, FieldRow, FieldError, FieldHint, TextInput, TextAreaInput } from '@rocket.chat/fuselage-forms';
 import { validateEmail } from '@rocket.chat/tools';
 import { CustomFieldsForm } from '@rocket.chat/ui-client';
@@ -14,8 +14,8 @@ import {
 	useLayout,
 } from '@rocket.chat/ui-contexts';
 import { useMutation } from '@tanstack/react-query';
-import type { AllHTMLAttributes, ReactElement } from 'react';
-import { useCallback } from 'react';
+import type { AllHTMLAttributes, ChangeEvent, ReactElement } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import type { AccountProfileFormValues } from './getProfileInitialValues';
@@ -25,6 +25,7 @@ import UserStatusMenu from '../../../components/UserStatusMenu';
 import UserAvatarEditor from '../../../components/avatar/UserAvatarEditor';
 import { useUpdateAvatar } from '../../../hooks/useUpdateAvatar';
 import { USER_STATUS_TEXT_MAX_LENGTH, BIO_TEXT_MAX_LENGTH } from '../../../lib/constants';
+import { STATUS_DURATION_OPTIONS } from '../../../lib/statusDurations';
 
 const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactElement => {
 	const t = useTranslation();
@@ -56,6 +57,15 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 	} = useFormContext<AccountProfileFormValues>();
 
 	const { email, avatar, username, name: userFullName } = watch();
+
+	const [statusDuration, setStatusDuration] = useState('');
+	const [statusCustomDate, setStatusCustomDate] = useState(() => new Date().toLocaleDateString('en-CA'));
+	const [statusCustomTime, setStatusCustomTime] = useState(() => new Date().toTimeString().slice(0, 5));
+	const [statusDurationError, setStatusDurationError] = useState<string | undefined>();
+	const statusDurationOptions: SelectOption[] = useMemo(
+		() => STATUS_DURATION_OPTIONS.map(({ value, labelKey }) => [value, t(labelKey)]),
+		[t],
+	);
 
 	const previousEmail = user ? getUserEmailAddress(user) : '';
 	const previousUsername = user?.username || '';
@@ -95,11 +105,36 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 	};
 
 	const updateOwnBasicInfo = useEndpoint('POST', '/v1/users.updateOwnBasicInfo');
+	const setUserStatus = useEndpoint('POST', '/v1/users.setStatus');
 
 	const updateAvatar = useUpdateAvatar(avatar, user?._id || '');
 
 	const handleSave = async ({ email, name, username, statusType, statusText, nickname, bio, customFields }: AccountProfileFormValues) => {
 		try {
+			if (statusDuration) {
+				const expiresAt = STATUS_DURATION_OPTIONS.find((o) => o.value === statusDuration)?.getExpiresAt?.({
+					now: new Date(),
+					customDate: statusCustomDate,
+					customTime: statusCustomTime,
+				});
+				if (statusDuration === 'custom') {
+					if (!expiresAt) {
+						setStatusDurationError(t('Status_choose_date_and_time'));
+						return;
+					}
+					if (expiresAt <= new Date()) {
+						setStatusDurationError(t('Status_expiration_must_be_future'));
+						return;
+					}
+				}
+				setStatusDurationError(undefined);
+				await setUserStatus({
+					message: statusText,
+					status: statusType,
+					...(expiresAt && { expiresAt: expiresAt.toISOString() }),
+				});
+			}
+
 			await updateOwnBasicInfo({
 				data: {
 					name,
@@ -185,8 +220,9 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 						{!canChangeUsername && <FieldHint>{t('Username_Change_Disabled')}</FieldHint>}
 					</Field>
 				</Box>
+				<Divider mbs={24} mbe={0} width='full' borderBlockStartColor='stroke-medium' />
 				<Field>
-					<FieldLabel>{t('StatusMessage')}</FieldLabel>
+					<FieldLabel>{t('Status')}</FieldLabel>
 					<FieldRow>
 						<Controller
 							control={control}
@@ -209,7 +245,7 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 											control={control}
 											name='statusType'
 											render={({ field: { value, onChange } }) => (
-												<UserStatusMenu margin='neg-x2' onChange={onChange} initialStatus={value as IUser['status']} />
+												<UserStatusMenu margin='neg-x2' onChange={onChange} initialStatus={value} />
 											)}
 										/>
 									}
@@ -219,7 +255,52 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 					</FieldRow>
 					{errors.statusText && <FieldError>{errors.statusText.message}</FieldError>}
 					{!allowUserStatusMessageChange && <FieldHint>{t('StatusMessage_Change_Disabled')}</FieldHint>}
+					{allowUserStatusMessageChange && <FieldHint>{t('Status_you_can_use_emoji')}</FieldHint>}
 				</Field>
+				<Field>
+					<FieldLabel>{t('Status_clear_after')}</FieldLabel>
+					<FieldRow>
+						<Select
+							value={statusDuration}
+							options={statusDurationOptions}
+							disabled={!allowUserStatusMessageChange}
+							onChange={(next) => {
+								setStatusDuration(String(next));
+								setStatusDurationError(undefined);
+							}}
+						/>
+					</FieldRow>
+					{statusDuration === 'custom' && (
+						<Box display='flex' mi='neg-x4' mbs={8}>
+							<Margins inline={4}>
+								<InputBox
+									aria-label={t('Status_expiration_date')}
+									type='date'
+									flexGrow={1}
+									value={statusCustomDate}
+									onChange={(e: ChangeEvent<HTMLInputElement>) => {
+										setStatusCustomDate(e.currentTarget.value);
+										setStatusDurationError(undefined);
+									}}
+									min={new Date().toLocaleDateString('en-CA')}
+								/>
+								<InputBox
+									aria-label={t('Status_expiration_time')}
+									type='time'
+									flexGrow={1}
+									value={statusCustomTime}
+									onChange={(e: ChangeEvent<HTMLInputElement>) => {
+										setStatusCustomTime(e.currentTarget.value);
+										setStatusDurationError(undefined);
+									}}
+								/>
+							</Margins>
+						</Box>
+					)}
+					{statusDurationError && <FieldError>{statusDurationError}</FieldError>}
+					<FieldHint>{t('Status_new_status_warning')}</FieldHint>
+				</Field>
+				<Divider mbs={24} mbe={0} width='full' borderBlockStartColor='stroke-medium' />
 				<Field>
 					<FieldLabel>{t('Nickname')}</FieldLabel>
 					<FieldRow>
