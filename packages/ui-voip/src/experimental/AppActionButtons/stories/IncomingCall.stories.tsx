@@ -1,6 +1,7 @@
 import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryFn } from '@storybook/react';
 
+import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { IncomingCall } from '../../../views';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
@@ -18,8 +19,10 @@ export default {
 	decorators: [
 		mockedContexts,
 		(Story) => (
-			<MockedMediaCallAppActionsProvider state='ringing'>
-				<Story />
+			<MockedMediaCallAppActionsProvider>
+				<MockedMediaCallProvider state='ringing'>
+					<Story />
+				</MockedMediaCallProvider>
 			</MockedMediaCallAppActionsProvider>
 		),
 	],

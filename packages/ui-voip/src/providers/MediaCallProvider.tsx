@@ -2,16 +2,14 @@ import type { ReactNode } from 'react';
 
 import MediaCallInstanceProvider from './MediaCallInstanceProvider';
 import MediaCallViewProvider from './MediaCallViewProvider';
-import type { MediaCallAppActionsContextValue } from '../experimental/AppActionButtons';
 
 type MediaCallProviderProps = {
 	children: ReactNode;
-	appActions?: MediaCallAppActionsContextValue;
 };
 
-const MediaCallProvider = ({ children, appActions }: MediaCallProviderProps) => {
+const MediaCallProvider = ({ children }: MediaCallProviderProps) => {
 	return (
-		<MediaCallInstanceProvider appActions={appActions}>
+		<MediaCallInstanceProvider>
 			<MediaCallViewProvider>{children}</MediaCallViewProvider>
 		</MediaCallInstanceProvider>
 	);

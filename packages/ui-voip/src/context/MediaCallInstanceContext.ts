@@ -5,13 +5,12 @@ import { createContext, useContext } from 'react';
 
 import type { PeerAutocompleteOptions } from '../components';
 import type { PeerInfo } from './definitions';
-import type { MediaCallAppActionsContextValue } from '../experimental/AppActionButtons';
 
 export type Signals = {
 	toggleWidget: { peerInfo?: PeerInfo };
 };
 
-export type MediaCallInstanceContextValue = {
+type MediaCallInstanceContextValue = {
 	instance: MediaSignalingSession | undefined;
 	signalEmitter: Emitter<Signals>;
 	audioElement: RefObject<HTMLAudioElement> | undefined;
@@ -20,7 +19,6 @@ export type MediaCallInstanceContextValue = {
 	setOpenRoomId: (openRoomId: string | undefined) => void;
 	getAutocompleteOptions: (filter: string) => Promise<PeerAutocompleteOptions[]>;
 	setInRoomView: (inRoomView: boolean) => void;
-	appActions?: MediaCallAppActionsContextValue;
 };
 
 export const MediaCallInstanceContext = createContext<MediaCallInstanceContextValue>({

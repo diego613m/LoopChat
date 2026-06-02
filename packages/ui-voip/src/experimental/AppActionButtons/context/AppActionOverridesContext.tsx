@@ -1,12 +1,12 @@
 import { createContext, useContext } from 'react';
 
-import type { AppActionUpdate } from './MediaCallAppActionsContext';
+import type { AppActionUpdate, MediaCallAppAction } from './MediaCallAppActionsContext';
 
 type AppActionOverridesContextValue = {
 	/** Persisted button state updates, keyed by `${appId}-${actionId}`. */
-	overrides: Record<string, AppActionUpdate>;
+	overrides: Record<MediaCallAppAction['key'], AppActionUpdate>;
 	/** Merges `update` into the stored entry for `key`. */
-	setOverride: (key: string, update: AppActionUpdate) => void;
+	setOverride: (key: MediaCallAppAction['key'], update: AppActionUpdate) => void;
 };
 
 const AppActionOverridesContext = createContext<AppActionOverridesContextValue>({

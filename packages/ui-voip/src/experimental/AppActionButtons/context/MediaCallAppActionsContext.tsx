@@ -1,6 +1,5 @@
-import { useContext } from 'react';
-
-import { MediaCallInstanceContext, type SessionState } from '../../../context';
+import type { Branded } from '@rocket.chat/core-typings';
+import { createContext, useContext } from 'react';
 
 export type AppActionUpdate = {
 	actionId?: string;
@@ -19,20 +18,31 @@ export type MediaCallAppActionDescriptor = {
 	callStates?: MediaCallWidgetState[];
 };
 
-export type MediaCallAppActionsContextValue =
-	| {
-			actions: MediaCallAppActionDescriptor[];
-			handleInteraction: (interaction: {
-				button: Pick<MediaCallAppActionDescriptor, 'appId' | 'actionId'>;
-				sessionState: { state: MediaCallState; roomId?: string } & Omit<SessionState, 'state'>;
-			}) => Promise<{ update: AppActionUpdate } | void>;
-	  }
-	| never;
+export const brandMediaCallAppAction = (appId: string, actionId: string): MediaCallAppAction['key'] =>
+	`${appId}-${actionId}` as MediaCallAppAction['key'];
+
+export type MediaCallAppAction = {
+	key: Branded<string, 'MediaCallAppAction'>;
+	disabled: boolean;
+} & MediaCallAppActionDescriptor;
+
+export type AppButtonInteractionHandler = (interaction: {
+	button: Pick<MediaCallAppActionDescriptor, 'appId' | 'actionId'>;
+	sessionState: { callId: string; roomId?: string };
+}) => Promise<{ update: AppActionUpdate } | void>;
+
+export type MediaCallAppActionsContextValue = {
+	actions: MediaCallAppAction[];
+	handleInteraction: AppButtonInteractionHandler;
+};
 
 export const defaultMediaCallAppActionsContextValue: MediaCallAppActionsContextValue = {
 	actions: [],
 	handleInteraction: Promise.resolve,
 };
 
-export const useMediaCallAppActions = () => useContext(MediaCallInstanceContext).appActions || defaultMediaCallAppActionsContextValue;
+const MediaCallAppActionsContext = createContext<MediaCallAppActionsContextValue>(defaultMediaCallAppActionsContextValue);
 
+export const useMediaCallAppActions = () => useContext(MediaCallAppActionsContext);
+
+export default MediaCallAppActionsContext;

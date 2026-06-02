@@ -3,11 +3,10 @@ import { mockAppRoot } from '@rocket.chat/mock-providers';
 import type { Meta, StoryObj } from '@storybook/react';
 
 import { useMediaCallView, useWidgetExternalControls } from '../../../context';
+import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
 import { MediaCallWidget } from '../../../views';
-import type { MediaCallAppActionDescriptor } from '../context/MediaCallAppActionsContext';
-import MockedMediaCallAppActionsProvider, {
-	type MockedMediaCallAppActionsProviderProps,
-} from '../providers/MockedMediaCallAppActionsProvider';
+import type { AppButtonInteractionHandler, MediaCallAppActionDescriptor } from '../context/MediaCallAppActionsContext';
+import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 const mockedContexts = mockAppRoot()
 	.withTranslations('en', 'core', {
@@ -80,18 +79,18 @@ const stateAwareActions: MediaCallAppActionDescriptor[] = [
 	},
 ];
 
-const handleInteraction: MockedMediaCallAppActionsProviderProps['handleInteraction'] = async ({ button, sessionState }) => {
+const handleInteraction: AppButtonInteractionHandler = async ({ button, sessionState }) => {
 	switch (button.actionId) {
 		case 'always-visible':
-			return { update: { label: `Clicked in state ${sessionState.state}`, actionId: 'default' } };
+			return { update: { label: `Clicked in state ${sessionState.callId}`, actionId: 'default' } };
 		case 'new-only':
 		case 'ringing-states':
 		case 'calling-states':
 		case 'ongoing-only':
 		case 'danger-action':
-			return { update: { label: `Clicked in state ${sessionState.state} (filtered)` } };
+			return { update: { label: `Clicked in state ${sessionState.callId} (filtered)` } };
 		default:
-			return { update: { disabled: false } };
+			return undefined;
 	}
 };
 
@@ -149,14 +148,10 @@ const meta = {
 		(Story, { args }) => (
 			// key forces a full remount whenever the initial-state arg changes,
 			// so the widget always starts fresh from the selected state.
-			<MockedMediaCallAppActionsProvider
-				actions={stateAwareActions}
-				handleInteraction={handleInteraction}
-				key={`${args.state}-${args.transferredBy}`}
-				state={args.state}
-				transferredBy={args.transferredBy}
-			>
-				<Story />
+			<MockedMediaCallAppActionsProvider actions={stateAwareActions} handleInteraction={handleInteraction}>
+				<MockedMediaCallProvider state={args.state} transferredBy={args.transferredBy}>
+					<Story />
+				</MockedMediaCallProvider>
 			</MockedMediaCallAppActionsProvider>
 		),
 	],

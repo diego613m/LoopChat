@@ -4,7 +4,7 @@ import type { MediaSignalingSession } from '@rocket.chat/media-signaling';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
-import { MediaCallInstanceContext, type MediaCallInstanceContextValue, type Signals } from '../context/MediaCallInstanceContext';
+import { MediaCallInstanceContext, type Signals } from '../context/MediaCallInstanceContext';
 import MediaCallViewContext from '../context/MediaCallViewContext';
 import type { State, PeerInfo, SessionState } from '../context/definitions';
 import AppActionOverridesProvider from '../experimental/AppActionButtons/providers/AppActionOverridesProvider';
@@ -21,7 +21,6 @@ export type MockedMediaCallProviderProps = {
 	muted?: boolean;
 	held?: boolean;
 	onClickDirectMessage?: () => void;
-	appActions?: MediaCallInstanceContextValue['appActions'];
 };
 
 const MockedMediaCallProvider = ({
@@ -33,7 +32,6 @@ const MockedMediaCallProvider = ({
 	remoteHeld = false,
 	muted = false,
 	held = false,
-	appActions = undefined,
 }: MockedMediaCallProviderProps) => {
 	const [peerInfo, setPeerInfo] = useState<PeerInfo | undefined>({
 		displayName: 'John Doe',
@@ -175,7 +173,6 @@ const MockedMediaCallProvider = ({
 		getAutocompleteOptions,
 		inRoomView: false,
 		setInRoomView: () => undefined,
-		appActions,
 	};
 
 	return (

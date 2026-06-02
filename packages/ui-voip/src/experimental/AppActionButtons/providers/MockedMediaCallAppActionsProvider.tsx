@@ -1,15 +1,18 @@
-import type { MediaCallInstanceContextValue } from '../../../context/MediaCallInstanceContext';
-import MockedMediaCallProvider, { type MockedMediaCallProviderProps } from '../../../providers/MockedMediaCallProvider';
+import AppActionOverridesProvider from './AppActionOverridesProvider';
+import MediaCallAppActionsProvider from './MediaCallAppActionsProvider';
+import type { AppButtonInteractionHandler, MediaCallAppActionDescriptor } from '../context/MediaCallAppActionsContext';
 
-export type MockedMediaCallAppActionsProviderProps = MockedMediaCallProviderProps & Partial<MediaCallInstanceContextValue['appActions']>;
-type HandleInteractionReturn = Awaited<ReturnType<NonNullable<MediaCallInstanceContextValue['appActions']>['handleInteraction']>>;
+type MockedMediaCallAppActionsProviderProps = {
+	children: React.ReactNode;
+	actions?: MediaCallAppActionDescriptor[];
+	handleInteraction?: AppButtonInteractionHandler;
+};
 
-const MockedMediaCallAppActionsProvider = ({ children, actions, handleInteraction, ...rest }: MockedMediaCallAppActionsProviderProps) => {
+const MockedMediaCallAppActionsProvider = ({ children, actions, handleInteraction }: MockedMediaCallAppActionsProviderProps) => {
 	return (
-		<MockedMediaCallProvider
-			{...rest}
-			appActions={{
-				actions: actions || [
+		<MediaCallAppActionsProvider
+			actions={
+				actions || [
 					{
 						appId: 'app-id',
 						actionId: 'change-label',
@@ -20,30 +23,31 @@ const MockedMediaCallAppActionsProvider = ({ children, actions, handleInteractio
 						actionId: 'change-variant',
 						label: 'Click to change label AND variant',
 					},
-				],
-				handleInteraction:
-					handleInteraction ||
-					(async ({ button, sessionState }) => {
-						console.log(`Action clicked in call state`, { button, sessionState });
-						const { promise, resolve } = Promise.withResolvers<HandleInteractionReturn>();
-						setTimeout(() => {
-							switch (button.actionId) {
-								case 'change-label':
-									resolve({ update: { label: 'Label changed!' } });
-									break;
-								case 'change-variant':
-									resolve({ update: { label: 'Variant changed!', variant: 'danger' } });
-									break;
-								default:
-									resolve({ update: {} });
-							}
-						}, 500);
-						return promise;
-					}),
-			}}
+				]
+			}
+			handleInteraction={
+				handleInteraction ||
+				(({ button, sessionState }) => {
+					console.log(`Action clicked in call state`, { button, sessionState });
+					const { promise, resolve } = Promise.withResolvers<Awaited<ReturnType<AppButtonInteractionHandler>>>();
+					setTimeout(() => {
+						switch (button.actionId) {
+							case 'change-label':
+								resolve({ update: { label: 'Label changed!' } });
+								break;
+							case 'change-variant':
+								resolve({ update: { label: 'Variant changed!', variant: 'danger' } });
+								break;
+							default:
+								resolve({ update: { disabled: false } });
+						}
+					}, 500);
+					return promise;
+				})
+			}
 		>
-			{children}
-		</MockedMediaCallProvider>
+			<AppActionOverridesProvider>{children}</AppActionOverridesProvider>
+		</MediaCallAppActionsProvider>
 	);
 };
 
