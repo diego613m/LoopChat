@@ -25,17 +25,8 @@ const MediaCallInstanceProvider = ({ children }: MediaCallInstanceProviderProps)
 	const getAutocompleteOptions = useGetAutocompleteOptions(instance);
 
 	const value = useMemo(
-		() => ({
-			instance,
-			signalEmitter,
-			audioElement,
-			openRoomId,
-			setOpenRoomId,
-			getAutocompleteOptions,
-			inRoomView,
-			setInRoomView,
-		}),
-		[instance, signalEmitter, audioElement, openRoomId, setOpenRoomId, getAutocompleteOptions, inRoomView, setInRoomView],
+		() => ({ instance, signalEmitter, audioElement, openRoomId, setOpenRoomId, getAutocompleteOptions, inRoomView, setInRoomView }),
+		[instance, signalEmitter, audioElement, openRoomId, setOpenRoomId, getAutocompleteOptions, inRoomView],
 	);
 
 	return (

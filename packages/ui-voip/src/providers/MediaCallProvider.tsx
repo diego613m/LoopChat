@@ -10,7 +10,8 @@ type MediaCallProviderProps = {
 const MediaCallProvider = ({ children }: MediaCallProviderProps) => {
 	return (
 		<MediaCallInstanceProvider>
-			<MediaCallViewProvider>{children}</MediaCallViewProvider>
+			<MediaCallViewProvider />
+			{children}
 		</MediaCallInstanceProvider>
 	);
 };

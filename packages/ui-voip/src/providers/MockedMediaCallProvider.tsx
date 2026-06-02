@@ -105,7 +105,7 @@ const MockedMediaCallProvider = ({
 			case 'new':
 				setWidgetState('calling');
 				setTimeout(() => {
-					setWidgetState(() => 'ongoing');
+					setWidgetState('ongoing');
 				}, 1000);
 				break;
 			case 'calling':
