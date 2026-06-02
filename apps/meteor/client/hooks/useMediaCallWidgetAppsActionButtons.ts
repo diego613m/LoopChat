@@ -2,8 +2,9 @@ import '@rocket.chat/apps-engine/experimental/MediaCallActionButtons';
 import { useToastMessageDispatch } from '@rocket.chat/ui-contexts';
 import type { ActionButtonUpdatePayload } from '@rocket.chat/ui-contexts/dist/ActionManagerContext';
 import type {
+	AppButtonInteractionHandler,
 	MediaCallAppActionDescriptor,
-	MediaCallAppActionsContextValue,
+	MediaCallAppActionsProviderProps,
 } from '@rocket.chat/ui-voip/dist/experimental/AppActionButtons';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +22,7 @@ export const useMediaCallWidgetAppsActionButtons = () => {
 	const applyAuthFilter = useApplyButtonAuthFilter();
 	const { data } = useAppActionButtons('mediaCallWidgetAction');
 
-	return useMemo<MediaCallAppActionsContextValue>(
+	return useMemo<Omit<MediaCallAppActionsProviderProps, 'children'>>(
 		() => ({
 			actions:
 				data
@@ -37,7 +38,7 @@ export const useMediaCallWidgetAppsActionButtons = () => {
 					) || [],
 
 			handleInteraction: async ({ button, sessionState }) => {
-				const { promise, resolve } = Promise.withResolvers<Awaited<ReturnType<MediaCallAppActionsContextValue['handleInteraction']>>>();
+				const { promise, resolve } = Promise.withResolvers<Awaited<ReturnType<AppButtonInteractionHandler>>>();
 				const updateHandler: (data: ActionButtonUpdatePayload) => void = ({ appId, actionId, update }) => {
 					if (appId !== button.appId || actionId !== button.actionId) {
 						return;
