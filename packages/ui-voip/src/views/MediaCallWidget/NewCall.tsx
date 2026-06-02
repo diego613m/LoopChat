@@ -15,7 +15,6 @@ import {
 import { usePeerAutocomplete } from '../../context';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 import { useWidgetExternalControls } from '../../context/useWidgetExternalControls';
-import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 
 const NewCall = () => {
 	const { t } = useTranslation();
@@ -41,7 +40,6 @@ const NewCall = () => {
 				)}
 			</WidgetContent>
 			<WidgetFooter>
-				<AppActions />
 				<ButtonGroup stretch>
 					<DevicePicker secondary />
 					<Button medium icon='phone' success flexGrow={1} onClick={onCall}>
