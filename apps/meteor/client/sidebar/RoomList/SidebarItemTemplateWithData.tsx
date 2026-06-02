@@ -75,7 +75,7 @@ const SidebarItemTemplateWithData = ({
 	const dmUserId =
 		room.t === 'd' && userId ? (room.uids?.find((uid) => uid !== userId) ?? (room.uids?.length === 1 ? userId : undefined)) : undefined;
 	const dmPresence = useUserPresence(dmUserId);
-	const { handleMouseEnter, handleMouseLeave } = useStatusTooltip(dmPresence?.statusText, dmPresence?.statusExpiresAt);
+	const { handleMouseEnter, handleMouseLeave } = useStatusTooltip(dmPresence?.statusText, dmPresence?.statusExpiresAt, dmPresence?.status);
 
 	const href = roomCoordinator.getRouteLink(room.t, room) || '';
 	const title = roomCoordinator.getRoomName(room.t, room) || '';
