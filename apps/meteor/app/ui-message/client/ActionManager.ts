@@ -21,7 +21,7 @@ type Events = {
 	'action_button.update': {
 		appId: string;
 		actionId: string;
-		update: { actionId?: string; labelI18n?: string; variant?: 'danger'; disabled?: boolean };
+		update: { actionId?: string; labelI18n?: string; variant?: 'default' | 'danger'; disabled?: boolean };
 	};
 	[viewId: string]: any;
 };

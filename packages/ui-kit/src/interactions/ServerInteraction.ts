@@ -82,7 +82,7 @@ type UpdateActionButtonServerInteraction = {
 	update: {
 		actionId?: string;
 		labelI18n?: string;
-		variant?: 'danger';
+		variant?: 'default' | 'danger';
 		disabled?: boolean;
 	};
 };

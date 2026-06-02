@@ -1,6 +1,5 @@
 import '@rocket.chat/apps-engine/experimental/MediaCallActionButtons';
-import { useToastMessageDispatch } from '@rocket.chat/ui-contexts';
-import type { ActionButtonUpdatePayload } from '@rocket.chat/ui-contexts/dist/ActionManagerContext';
+import { useToastMessageDispatch, type ActionButtonUpdatePayload } from '@rocket.chat/ui-contexts';
 import type {
 	AppButtonInteractionHandler,
 	MediaCallAppActionDescriptor,

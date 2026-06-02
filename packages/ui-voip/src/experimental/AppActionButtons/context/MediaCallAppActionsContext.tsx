@@ -38,7 +38,7 @@ export type MediaCallAppActionsContextValue = {
 
 export const defaultMediaCallAppActionsContextValue: MediaCallAppActionsContextValue = {
 	actions: [],
-	handleInteraction: Promise.resolve,
+	handleInteraction: () => Promise.resolve(),
 };
 
 const MediaCallAppActionsContext = createContext<MediaCallAppActionsContextValue>(defaultMediaCallAppActionsContextValue);

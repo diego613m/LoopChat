@@ -22,7 +22,7 @@ declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionRespon
 		/** Replaces the i18n key used to render the button label. */
 		labelI18n?: string;
 		/** Replaces the visual variant of the button. */
-		variant?: 'danger' | 'default';
+		variant?: 'default' | 'danger';
 		/** Disables the button if `true`, enables it if `false`. */
 		disabled?: boolean;
 	};
