@@ -18,6 +18,7 @@ import {
 } from '../../components';
 import { useMediaCallView } from '../../context/MediaCallViewContext';
 import useRoomView from '../../context/useRoomView';
+import AppActions from '../../experimental/AppActionButtons/components/AppActions';
 import { usePlayMediaStream } from '../../providers/usePlayMediaStream';
 
 type MediaCallRoomSectionProps = {
@@ -131,10 +132,13 @@ const MediaCallRoomSection = ({ showChat, onToggleChat, user, containerHeight }:
 					</Box>
 				}
 				rightSlot={
-					<ButtonGroup>
-						<ActionToggleChat pressed={showChat} onClick={onToggleChat} />
-						<DevicePicker secondary />
-					</ButtonGroup>
+					<>
+						<AppActions />
+						<ButtonGroup>
+							<ActionToggleChat pressed={showChat} onClick={onToggleChat} />
+							<DevicePicker secondary />
+						</ButtonGroup>
+					</>
 				}
 			>
 				<ToggleButton label={t('Mute')} icons={['mic', 'mic-off']} titles={[t('Mute'), t('Unmute')]} pressed={muted} onToggle={onMute} />

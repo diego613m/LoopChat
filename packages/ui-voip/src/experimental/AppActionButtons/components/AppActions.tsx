@@ -5,7 +5,7 @@ import { useMediaCallInstance, useMediaCallView } from '../../../context';
 import { useAppActionOverrides } from '../context/AppActionOverridesContext';
 import { useMediaCallAppActions, type MediaCallAppAction } from '../context/MediaCallAppActionsContext';
 
-const AppActions = () => {
+const AppActions = ({ vertical = true }: { vertical?: boolean }) => {
 	const {
 		sessionState: { callId, state: currentCallState },
 	} = useMediaCallView();
@@ -44,11 +44,17 @@ const AppActions = () => {
 			return action.key in overrides ? { ...action, ...overrides[action.key] } : action;
 		});
 
+	const style: { padding?: string } = {};
+
+	if (!vertical) {
+		style.padding = '.5rem';
+	}
+
 	return (
 		<>
-			<ButtonGroup vertical stretch>
+			<ButtonGroup vertical={vertical} stretch style={style}>
 				{visibleActions.map(({ key, label, variant, disabled, appId, actionId }) => (
-					<Button key={key} danger={variant === 'danger'} disabled={disabled} onClick={() => onClick(key, appId, actionId)}>
+					<Button medium key={key} danger={variant === 'danger'} disabled={disabled} onClick={() => onClick(key, appId, actionId)}>
 						{label}
 					</Button>
 				))}
