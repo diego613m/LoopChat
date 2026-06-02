@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { ActionStrip, Timer, ActionToggleChat, ToggleButton } from '../../../components';
 import MockedMediaCallProvider from '../../../providers/MockedMediaCallProvider';
-import AppActions from '../components/AppActions';
+import { AppActionButtons } from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 export default {
@@ -40,8 +40,8 @@ export const ActionStripStory: StoryFn<typeof ActionStrip> = (args) => {
 	const [pressed, setPressed] = useState(false);
 	const rightSlot = (
 		<>
-			<AppActions vertical={false} />
 			<ButtonGroup>
+				<AppActionButtons />
 				<ActionToggleChat pressed={pressed} onClick={() => setPressed(!pressed)} />
 			</ButtonGroup>
 		</>

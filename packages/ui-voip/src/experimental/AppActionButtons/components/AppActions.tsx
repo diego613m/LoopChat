@@ -1,11 +1,11 @@
-import { Button, ButtonGroup, Divider } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup } from '@rocket.chat/fuselage';
 import { useCallback } from 'react';
 
 import { useMediaCallInstance, useMediaCallView } from '../../../context';
 import { useAppActionOverrides } from '../context/AppActionOverridesContext';
 import { useMediaCallAppActions, type MediaCallAppAction } from '../context/MediaCallAppActionsContext';
 
-const AppActions = ({ vertical = true }: { vertical?: boolean }) => {
+export const AppActionButtons = () => {
 	const {
 		sessionState: { callId, state: currentCallState },
 	} = useMediaCallView();
@@ -44,24 +44,17 @@ const AppActions = ({ vertical = true }: { vertical?: boolean }) => {
 			return action.key in overrides ? { ...action, ...overrides[action.key] } : action;
 		});
 
-	const style: { padding?: string } = {};
-
-	if (!vertical) {
-		style.padding = '.5rem';
-	}
-
-	return (
-		<>
-			<ButtonGroup vertical={vertical} stretch style={style}>
-				{visibleActions.map(({ key, label, variant, disabled, appId, actionId }) => (
-					<Button medium key={key} danger={variant === 'danger'} disabled={disabled} onClick={() => onClick(key, appId, actionId)}>
-						{label}
-					</Button>
-				))}
-			</ButtonGroup>
-			<Divider />
-		</>
-	);
+	return visibleActions.map(({ key, label, variant, disabled, appId, actionId }) => (
+		<Button medium key={key} danger={variant === 'danger'} disabled={disabled} onClick={() => onClick(key, appId, actionId)}>
+			{label}
+		</Button>
+	));
 };
+
+const AppActions = () => (
+	<ButtonGroup vertical stretch>
+		<AppActionButtons />
+	</ButtonGroup>
+);
 
 export default AppActions;
