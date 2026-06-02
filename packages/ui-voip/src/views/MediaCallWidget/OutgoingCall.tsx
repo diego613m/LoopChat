@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Divider } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup } from '@rocket.chat/fuselage';
 import { useTranslation } from 'react-i18next';
 
 import { PeerInfo, Widget, WidgetFooter, WidgetHandle, WidgetHeader, WidgetContent, DevicePicker } from '../../components';
@@ -29,7 +29,6 @@ const OutgoingCall = () => {
 			</WidgetContent>
 			<WidgetFooter>
 				<AppActions />
-				<Divider />
 				<ButtonGroup stretch>
 					<Button medium name='phone' icon='phone-off' danger flexGrow={1} onClick={onEndCall}>
 						{t('Cancel')}

@@ -1,4 +1,4 @@
-import { ButtonGroup, Divider } from '@rocket.chat/fuselage';
+import { ButtonGroup } from '@rocket.chat/fuselage';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -57,7 +57,6 @@ const OngoingCall = () => {
 			<WidgetFooter>
 				{keypad}
 				<AppActions />
-				<Divider />
 				<ButtonGroup large>
 					<ActionButton disabled={connecting || reconnecting} icon='dialpad' label='Dialpad' {...keypadButtonProps} />
 					<ToggleButton label={t('Mute')} icons={['mic', 'mic-off']} titles={[t('Mute'), t('Unmute')]} pressed={muted} onToggle={onMute} />

@@ -1,4 +1,4 @@
-import { Button, ButtonGroup } from '@rocket.chat/fuselage';
+import { Button, ButtonGroup, Divider } from '@rocket.chat/fuselage';
 import { useCallback } from 'react';
 
 import { useMediaCallInstance, useMediaCallView } from '../../../context';
@@ -51,10 +51,22 @@ export const AppActionButtons = () => {
 	));
 };
 
-const AppActions = () => (
-	<ButtonGroup vertical stretch>
-		<AppActionButtons />
-	</ButtonGroup>
-);
+const AppActions = () => {
+	// eslint-disable-next-line new-cap
+	const RenderedButtons = AppActionButtons();
+
+	if (RenderedButtons.length === 0) {
+		return null;
+	}
+
+	return (
+		<>
+			<ButtonGroup vertical stretch>
+				{RenderedButtons}
+			</ButtonGroup>
+			<Divider />
+		</>
+	);
+};
 
 export default AppActions;
