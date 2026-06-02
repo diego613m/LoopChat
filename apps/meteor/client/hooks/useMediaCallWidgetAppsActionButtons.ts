@@ -55,7 +55,8 @@ export const useMediaCallWidgetAppsActionButtons = () => {
 
 				actionManager.on('action_button.update', updateHandler);
 
-				await actionManager
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-return -- The promise IS typed.
+				return actionManager
 					.emitInteraction(button.appId, {
 						type: 'actionButton',
 						actionId: button.actionId,
@@ -68,14 +69,16 @@ export const useMediaCallWidgetAppsActionButtons = () => {
 					.catch((error) => {
 						if (error instanceof UiKitTriggerTimeoutError) {
 							dispatchToastMessage({ type: 'error', message: t('The_action_took_too_long_to_complete') });
-							return;
+						} else {
+							dispatchToastMessage({ type: 'error', message: t('An_error_occurred_while_executing_the_action') });
 						}
-
-						dispatchToastMessage({ type: 'error', message: t('An_error_occurred_while_executing_the_action') });
 					})
-					.finally(() => resolve({ update: { disabled: false } }));
-
-				return promise;
+					.finally(() => {
+						resolve({ update: { disabled: false } });
+						// If the app responds with an update, the handler will be triggered before this promise is resolved. If the response is NOT an update, the handler would never be called anyway
+						actionManager.off('action_button.update', updateHandler);
+					})
+					.then(() => promise);
 			},
 		}),
 		[actionManager, applyAuthFilter, data, dispatchToastMessage, t],
