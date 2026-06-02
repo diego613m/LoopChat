@@ -91,7 +91,7 @@ const OngoingCall = () => {
 					{!isPopout && (
 						<>
 							{remoteScreen?.active && (
-								<StreamCard autoHeight maxHeight={120}>
+								<StreamCard autoHeight maxHeight={120} onClickOpenInRoom={onClickDirectMessage}>
 									<video preload='metadata' style={{ objectFit: 'contain', height: '100%', width: '100%' }} ref={remoteStreamRefCallback}>
 										<track kind='captions' />
 									</video>
