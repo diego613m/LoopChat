@@ -1,7 +1,7 @@
-import type { CallHistoryItem, IRegisterUser } from '@rocket.chat/core-typings';
-import type { FindOptions } from 'mongodb';
+import type { CallHistoryItem, IRegisterUser, IUser } from '@rocket.chat/core-typings';
+import type { FindCursor, FindOptions } from 'mongodb';
 
-import type { IBaseModel } from './IBaseModel';
+import type { FindPaginated, IBaseModel, InsertionModel } from './IBaseModel';
 
 export interface ICallHistoryModel extends IBaseModel<CallHistoryItem> {
 	findOneByIdAndUid(
@@ -16,5 +16,18 @@ export interface ICallHistoryModel extends IBaseModel<CallHistoryItem> {
 		options?: FindOptions<CallHistoryItem>,
 	): Promise<CallHistoryItem | null>;
 
+	findAllByUserIdAndSearchFilters(
+		uid: IUser['_id'],
+		filters: {
+			type?: CallHistoryItem['type'];
+			searchTerm?: string;
+			direction?: CallHistoryItem['direction'];
+			inStates?: CallHistoryItem['state'][];
+		},
+		options: FindOptions<CallHistoryItem>,
+	): FindPaginated<FindCursor<CallHistoryItem>>;
+
 	updateUserReferences(userId: IRegisterUser['_id'], username: IRegisterUser['username'], name?: IRegisterUser['name']): Promise<void>;
+
+	importHistoryItem(data: InsertionModel<CallHistoryItem>): Promise<CallHistoryItem['_id'] | null>;
 }
