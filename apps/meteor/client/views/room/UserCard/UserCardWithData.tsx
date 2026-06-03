@@ -64,7 +64,7 @@ const UserCardWithData = ({ username, rid, onOpenUserInfo, onClose }: UserCardWi
 			etag: avatarETag,
 			localTime: utcOffset && Number.isInteger(utcOffset) && <LocalTime utcOffset={utcOffset} />,
 			status: _id && <ReactiveUserStatus uid={_id} />,
-			customStatus: <UserStatusText statusText={statusText} statusExpiresAt={statusExpiresAt} showExpiration />,
+			customStatus: statusText && <UserStatusText statusText={statusText} statusExpiresAt={statusExpiresAt} showExpiration />,
 			nickname,
 			freeSwitchExtension,
 		};
