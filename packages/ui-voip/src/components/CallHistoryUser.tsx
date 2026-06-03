@@ -1,18 +1,18 @@
 import CallHistoryExternalUser from './CallHistoryExternalUser';
 import CallHistoryInternalUser from './CallHistoryInternalUser';
 import CallHistoryUnknownUser from './CallHistoryUnknownUser';
-import { isExternalCallHistoryContact, isInternalCallHistoryContact, type CallHistoryContact } from '../definitions';
+import { isCallHistoryExternalContact, isCallHistoryInternalContact, type CallHistoryContact } from '../definitions';
 
 type CallHistoryUserProps = {
 	contact: CallHistoryContact;
 };
 
 const CallHistoryUser = ({ contact }: CallHistoryUserProps) => {
-	if (isInternalCallHistoryContact(contact)) {
+	if (isCallHistoryInternalContact(contact)) {
 		return <CallHistoryInternalUser contact={contact} />;
 	}
 
-	if (isExternalCallHistoryContact(contact)) {
+	if (isCallHistoryExternalContact(contact)) {
 		return <CallHistoryExternalUser showIcon={false} contact={contact} />;
 	}
 

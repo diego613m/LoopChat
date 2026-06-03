@@ -1,4 +1,4 @@
-export type ExternalCallHistoryContact =
+export type CallHistoryExternalContact =
 	| {
 			number: string;
 			name?: string;
@@ -8,29 +8,29 @@ export type ExternalCallHistoryContact =
 			name: string;
 	  };
 
-export type InternalCallHistoryContact = {
+export type CallHistoryInternalContact = {
 	_id: string;
 	name?: string;
-	username?: string;
+	username: string;
 	displayName?: string;
 	voiceCallExtension?: string;
 	avatarUrl?: string;
 };
 
-export type UnknownCallHistoryContact = {
+export type CallHistoryUnknownContact = {
 	unknown: true;
 };
 
-export type CallHistoryContact = InternalCallHistoryContact | ExternalCallHistoryContact | UnknownCallHistoryContact;
+export type CallHistoryContact = CallHistoryInternalContact | CallHistoryExternalContact | CallHistoryUnknownContact;
 
-export const isUnknownCallHistoryContact = (contact: CallHistoryContact): contact is UnknownCallHistoryContact => {
+export const isCallHistoryUnknownContact = (contact: CallHistoryContact): contact is CallHistoryUnknownContact => {
 	return 'unknown' in contact && contact.unknown;
 };
 
-export const isInternalCallHistoryContact = (contact: CallHistoryContact): contact is InternalCallHistoryContact => {
+export const isCallHistoryInternalContact = (contact: CallHistoryContact): contact is CallHistoryInternalContact => {
 	return '_id' in contact && Boolean(contact._id);
 };
 
-export const isExternalCallHistoryContact = (contact: CallHistoryContact): contact is ExternalCallHistoryContact => {
-	return !isUnknownCallHistoryContact(contact) && !isInternalCallHistoryContact(contact);
+export const isCallHistoryExternalContact = (contact: CallHistoryContact): contact is CallHistoryExternalContact => {
+	return !isCallHistoryUnknownContact(contact) && !isCallHistoryInternalContact(contact);
 };

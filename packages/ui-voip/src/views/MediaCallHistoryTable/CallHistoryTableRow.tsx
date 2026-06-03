@@ -9,18 +9,18 @@ import CallHistoryTableStatus from './CallHistoryTableStatus';
 import CallHistoryUser from '../../components/CallHistoryUser';
 import type {
 	CallHistoryContact,
-	ExternalCallHistoryContact,
-	InternalCallHistoryContact,
-	UnknownCallHistoryContact,
+	CallHistoryExternalContact,
+	CallHistoryInternalContact,
+	CallHistoryUnknownContact,
 } from '../../definitions';
 
 export type CallHistoryTableRowProps<T extends CallHistoryContact> = {
 	_id: string;
-	contact: T extends InternalCallHistoryContact
-		? InternalCallHistoryContact
-		: T extends ExternalCallHistoryContact
-			? ExternalCallHistoryContact
-			: UnknownCallHistoryContact;
+	contact: T extends CallHistoryInternalContact
+		? CallHistoryInternalContact
+		: T extends CallHistoryExternalContact
+			? CallHistoryExternalContact
+			: CallHistoryUnknownContact;
 	type: 'outbound' | 'inbound';
 	status: CallHistoryItemState;
 	duration: number;

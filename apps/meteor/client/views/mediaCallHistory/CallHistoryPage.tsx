@@ -3,7 +3,7 @@ import { Pagination } from '@rocket.chat/fuselage';
 import { useDebouncedValue } from '@rocket.chat/fuselage-hooks';
 import { useSort, usePagination, GenericTableLoadingRow } from '@rocket.chat/ui-client';
 import { useEndpoint, useRouteParameter, useRouter } from '@rocket.chat/ui-contexts';
-import { MediaCallHistoryTable, isUnknownCallHistoryContact, isInternalCallHistoryContact } from '@rocket.chat/ui-voip';
+import { MediaCallHistoryTable, isCallHistoryUnknownContact, isCallHistoryInternalContact } from '@rocket.chat/ui-voip';
 import type { CallHistoryContact } from '@rocket.chat/ui-voip';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useMemo, useState } from 'react';
@@ -205,10 +205,10 @@ const CallHistoryPage = () => {
 			{tableData && tableData.length > 0 && (
 				<MediaCallHistoryTable sort={sortProps}>
 					{tableData.map((item) => {
-						if (isUnknownCallHistoryContact(item.contact)) {
+						if (isCallHistoryUnknownContact(item.contact)) {
 							return <CallHistoryRowUnknownUser key={item._id} {...item} contact={item.contact} onClick={() => onClickRow('', item._id)} />;
 						}
-						if (isInternalCallHistoryContact(item.contact)) {
+						if (isCallHistoryInternalContact(item.contact)) {
 							return (
 								<CallHistoryRowInternalUser
 									key={item._id}

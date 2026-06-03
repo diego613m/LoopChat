@@ -19,7 +19,7 @@ import CallHistoryActions from './CallHistoryActions';
 import { useFullStartDate } from './useFullStartDate';
 import CallHistoryUser from '../../components/CallHistoryUser';
 import { usePeekMediaSessionState } from '../../context/usePeekMediaSessionState';
-import { isInternalCallHistoryContact, type CallHistoryContact } from '../../definitions';
+import { isCallHistoryInternalContact, type CallHistoryContact } from '../../definitions';
 import { getHistoryMessagePayload } from '../../ui-kit/getHistoryMessagePayload';
 
 export type CallHistoryData = {
@@ -82,7 +82,7 @@ const CallHistoryContextualBar = ({ onClose, actions, contact, data }: CallHisto
 						<InfoPanelLabel>{t('Call_ID')}</InfoPanelLabel>
 						<InfoPanelText>{callId}</InfoPanelText>
 					</InfoPanelSection>
-					{isInternalCallHistoryContact(contact) && contact.voiceCallExtension && (
+					{isCallHistoryInternalContact(contact) && contact.voiceCallExtension && (
 						<InfoPanelSection>
 							<InfoPanelLabel>{t('Voice_call_extension')}</InfoPanelLabel>
 							<InfoPanelText>{contact.voiceCallExtension}</InfoPanelText>
@@ -92,7 +92,7 @@ const CallHistoryContextualBar = ({ onClose, actions, contact, data }: CallHisto
 			</ContextualbarScrollableContent>
 			<ContextualbarFooter>
 				<ButtonGroup stretch>
-					{isInternalCallHistoryContact(contact) && directMessage && (
+					{isCallHistoryInternalContact(contact) && directMessage && (
 						<Button onClick={directMessage}>
 							<Icon name='balloon' size='x20' mie='x4' />
 							{t('Direct_message')}

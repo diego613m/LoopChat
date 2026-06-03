@@ -3,8 +3,8 @@ import {
 	CallHistoryContextualBar,
 	useWidgetExternalControls,
 	usePeekMediaSessionState,
-	type ExternalCallHistoryContact,
-	type UnknownCallHistoryContact,
+	type CallHistoryExternalContact,
+	type CallHistoryUnknownContact,
 } from '@rocket.chat/ui-voip';
 import { useMemo } from 'react';
 
@@ -18,7 +18,7 @@ type MediaCallHistoryExternalProps = {
 	onClose: () => void;
 };
 
-export const getExternalContact = (item: ExternalCallEndpointData['item']): ExternalCallHistoryContact | UnknownCallHistoryContact => {
+export const getExternalContact = (item: ExternalCallEndpointData['item']): CallHistoryExternalContact | CallHistoryUnknownContact => {
 	if (item.type === 'media-call') {
 		return {
 			number: item.contactExtension,

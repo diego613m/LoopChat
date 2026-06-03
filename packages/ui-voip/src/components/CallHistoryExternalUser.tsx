@@ -1,9 +1,9 @@
 import { Box, Icon, FramedIcon } from '@rocket.chat/fuselage';
 
-import type { ExternalCallHistoryContact } from '../definitions';
+import type { CallHistoryExternalContact } from '../definitions';
 
 type CallHistoryExternalUserProps = {
-	contact: ExternalCallHistoryContact;
+	contact: CallHistoryExternalContact;
 	showIcon?: boolean;
 };
 

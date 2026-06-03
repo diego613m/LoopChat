@@ -6,7 +6,7 @@ import type { Meta, StoryFn } from '@storybook/react';
 import type { CallHistoryTableRowProps } from './CallHistoryTableRow';
 import CallHistoryTableRow from './CallHistoryTableRow';
 import MediaCallHistoryTable from './MediaCallHistoryTable';
-import type { CallHistoryContact, InternalCallHistoryContact } from '../../definitions';
+import type { CallHistoryContact, CallHistoryInternalContact } from '../../definitions';
 
 const mockedContexts = mockAppRoot()
 	.withTranslations('en', 'core', {
@@ -80,9 +80,9 @@ const getContact = (index: number): CallHistoryContact => {
 };
 
 const results = Array.from({ length: 100 }).map(
-	(_, index): CallHistoryTableRowProps<InternalCallHistoryContact> => ({
+	(_, index): CallHistoryTableRowProps<CallHistoryInternalContact> => ({
 		_id: `call_${index}`,
-		contact: getContact(index) as InternalCallHistoryContact,
+		contact: getContact(index) as CallHistoryInternalContact,
 		type: index % 2 ? 'outbound' : 'inbound',
 		status: getStatus(index),
 		duration: index % 2 ? 120 : 0,
