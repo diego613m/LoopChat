@@ -1,5 +1,6 @@
 import { useMemo, type ReactNode } from 'react';
 
+import AppActionOverridesProvider from './AppActionOverridesProvider';
 import MediaCallAppActionsContext, {
 	brandMediaCallAppAction,
 	type AppButtonInteractionHandler,
@@ -14,18 +15,23 @@ export type MediaCallAppActionsProviderProps = {
 };
 
 const MediaCallAppActionsProvider = ({ children, actions, handleInteraction }: MediaCallAppActionsProviderProps) => {
-	const value = useMemo<MediaCallAppActionsContextValue>(() => {
-		return {
+	const value = useMemo<MediaCallAppActionsContextValue>(
+		() => ({
 			actions: actions.map((action) => ({
 				key: brandMediaCallAppAction(action.appId, action.actionId),
 				disabled: false,
 				...action,
 			})),
 			handleInteraction,
-		};
-	}, [actions, handleInteraction]);
+		}),
+		[actions, handleInteraction],
+	);
 
-	return <MediaCallAppActionsContext.Provider value={value}>{children}</MediaCallAppActionsContext.Provider>;
+	return (
+		<MediaCallAppActionsContext.Provider value={value}>
+			<AppActionOverridesProvider>{children}</AppActionOverridesProvider>
+		</MediaCallAppActionsContext.Provider>
+	);
 };
 
 export default MediaCallAppActionsProvider;

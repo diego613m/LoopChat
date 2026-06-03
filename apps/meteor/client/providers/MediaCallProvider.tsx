@@ -1,7 +1,7 @@
 import { Emitter } from '@rocket.chat/emitter';
 import { usePermission } from '@rocket.chat/ui-contexts';
 import { MediaCallProvider as MediaCallProviderBase, MediaCallInstanceContext } from '@rocket.chat/ui-voip';
-import { AppActionOverridesProvider, MediaCallAppActionsProvider } from '@rocket.chat/ui-voip/dist/experimental/AppActionButtons';
+import { MediaCallAppActionsProvider } from '@rocket.chat/ui-voip/dist/experimental/AppActionButtons';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
 
@@ -35,9 +35,7 @@ const MediaCallProvider = ({ children }: { children: ReactNode }) => {
 
 	return (
 		<MediaCallAppActionsProvider actions={actions} handleInteraction={handleInteraction}>
-			<AppActionOverridesProvider>
-				<MediaCallProviderBase>{children}</MediaCallProviderBase>
-			</AppActionOverridesProvider>
+			<MediaCallProviderBase>{children}</MediaCallProviderBase>
 		</MediaCallAppActionsProvider>
 	);
 };

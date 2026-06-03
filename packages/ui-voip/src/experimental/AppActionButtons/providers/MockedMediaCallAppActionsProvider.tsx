@@ -1,4 +1,3 @@
-import AppActionOverridesProvider from './AppActionOverridesProvider';
 import MediaCallAppActionsProvider from './MediaCallAppActionsProvider';
 import type { AppButtonInteractionHandler, MediaCallAppActionDescriptor } from '../context/MediaCallAppActionsContext';
 
@@ -46,7 +45,7 @@ const MockedMediaCallAppActionsProvider = ({ children, actions, handleInteractio
 				})
 			}
 		>
-			<AppActionOverridesProvider>{children}</AppActionOverridesProvider>
+			{children}
 		</MediaCallAppActionsProvider>
 	);
 };

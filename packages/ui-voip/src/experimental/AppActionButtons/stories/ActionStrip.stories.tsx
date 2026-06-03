@@ -10,7 +10,7 @@ import { AppActionButtons } from '../components/AppActions';
 import MockedMediaCallAppActionsProvider from '../providers/MockedMediaCallAppActionsProvider';
 
 export default {
-	title: 'Experimental/AppActionButtons/Components/Actions/ActionStrip',
+	title: 'Experimental/AppActionButtons/Components/ActionStrip',
 	component: ActionStrip,
 	decorators: [
 		mockAppRoot()
