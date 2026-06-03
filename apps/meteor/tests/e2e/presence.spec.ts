@@ -214,7 +214,12 @@ test.describe.serial('Presence', () => {
 				await page.goto('/account/profile');
 				await poAccountProfile.inputStatusText.fill(text);
 				await poAccountProfile.chooseClearStatusAfter('30 minutes');
-				await poAccountProfile.btnSaveChanges.click();
+				await Promise.all([
+					page.waitForResponse((r) => r.url().endsWith('/v1/users.setStatus') && r.ok()),
+					page.waitForResponse((r) => r.url().endsWith('/v1/users.updateOwnBasicInfo') && r.ok()),
+					poAccountProfile.btnSaveChanges.click(),
+				]);
+				await expect(page.getByText('Profile saved successfully')).toBeVisible();
 			});
 
 			await test.step('status with expiration appears in user menu', async () => {
