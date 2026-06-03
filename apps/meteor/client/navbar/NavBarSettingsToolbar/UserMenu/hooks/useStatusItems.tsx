@@ -44,6 +44,7 @@ export const useStatusItems = (user?: IUser): GenericMenuItemProps[] => {
 	});
 
 	const presenceDisabled = useSetting('Presence_broadcast_disabled', false);
+	const allowUserStatusMessageChange = useSetting('Accounts_AllowUserStatusMessageChange', true);
 
 	const { data: statuses } = useQuery({
 		queryKey: ['user-statuses'],
@@ -58,7 +59,7 @@ export const useStatusItems = (user?: IUser): GenericMenuItemProps[] => {
 	const handleCustomStatus = useCustomStatusModalHandler();
 	const customStatusExpiration = useExpirationText(user?.statusExpiresAt);
 
-	if (presenceDisabled) {
+	if (presenceDisabled || !allowUserStatusMessageChange) {
 		return [
 			{
 				id: 'presence-disabled',

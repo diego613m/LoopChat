@@ -169,10 +169,9 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 
 			await updateAvatar();
 			dispatchToastMessage({ type: 'success', message: t('Profile_saved_successfully') });
+			reset(values);
 		} catch (error) {
 			dispatchToastMessage({ type: 'error', message: error });
-		} finally {
-			reset(values);
 		}
 	};
 
