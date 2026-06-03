@@ -89,7 +89,7 @@ const EditStatusModal = ({ onClose }: EditStatusModalProps): ReactElement => {
 			customDate,
 			customTime,
 		});
-		if (duration === 'custom') {
+		if (allowUserStatusMessageChange && duration === 'custom') {
 			if (!expiresAt) {
 				setError('duration', { message: t('Status_choose_date_and_time') });
 				return;

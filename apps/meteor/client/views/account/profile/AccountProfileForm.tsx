@@ -116,7 +116,7 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 			customDate: statusCustomDate,
 			customTime: statusCustomTime,
 		});
-		if (statusDuration === 'custom') {
+		if (allowUserStatusMessageChange && statusDuration === 'custom') {
 			if (!expiresAt) {
 				setStatusDurationError(t('Status_choose_date_and_time'));
 				return;
