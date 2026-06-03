@@ -58,9 +58,10 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 
 	const { email, avatar, username, name: userFullName } = watch();
 
-	const [statusDuration, setStatusDuration] = useState('');
-	const [statusCustomDate, setStatusCustomDate] = useState(() => new Date().toLocaleDateString('en-CA'));
-	const [statusCustomTime, setStatusCustomTime] = useState(() => new Date().toTimeString().slice(0, 5));
+	const initialExpiration = user?.statusExpiresAt && new Date(user.statusExpiresAt) > new Date() ? new Date(user.statusExpiresAt) : null;
+	const [statusDuration, setStatusDuration] = useState(initialExpiration ? 'custom' : '');
+	const [statusCustomDate, setStatusCustomDate] = useState(() => (initialExpiration ?? new Date()).toLocaleDateString('en-CA'));
+	const [statusCustomTime, setStatusCustomTime] = useState(() => (initialExpiration ?? new Date()).toTimeString().slice(0, 5));
 	const [statusDurationError, setStatusDurationError] = useState<string | undefined>();
 	const statusDurationOptions: SelectOption[] = useMemo(
 		() => STATUS_DURATION_OPTIONS.map(({ value, labelKey }) => [value, t(labelKey)]),
@@ -110,24 +111,25 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 	const updateAvatar = useUpdateAvatar(avatar, user?._id || '');
 
 	const handleSave = async ({ email, name, username, statusType, statusText, nickname, bio, customFields }: AccountProfileFormValues) => {
+		const expiresAt = STATUS_DURATION_OPTIONS.find((o) => o.value === statusDuration)?.getExpiresAt?.({
+			now: new Date(),
+			customDate: statusCustomDate,
+			customTime: statusCustomTime,
+		});
+		if (statusDuration === 'custom') {
+			if (!expiresAt) {
+				setStatusDurationError(t('Status_choose_date_and_time'));
+				return;
+			}
+			if (expiresAt <= new Date()) {
+				setStatusDurationError(t('Status_expiration_must_be_future'));
+				return;
+			}
+		}
+		setStatusDurationError(undefined);
+
 		try {
-			if (statusDuration) {
-				const expiresAt = STATUS_DURATION_OPTIONS.find((o) => o.value === statusDuration)?.getExpiresAt?.({
-					now: new Date(),
-					customDate: statusCustomDate,
-					customTime: statusCustomTime,
-				});
-				if (statusDuration === 'custom') {
-					if (!expiresAt) {
-						setStatusDurationError(t('Status_choose_date_and_time'));
-						return;
-					}
-					if (expiresAt <= new Date()) {
-						setStatusDurationError(t('Status_expiration_must_be_future'));
-						return;
-					}
-				}
-				setStatusDurationError(undefined);
+			if (allowUserStatusMessageChange) {
 				await setUserStatus({
 					message: statusText,
 					status: statusType,
@@ -140,8 +142,6 @@ const AccountProfileForm = (props: AllHTMLAttributes<HTMLFormElement>): ReactEle
 					name,
 					...(user ? getUserEmailAddress(user) !== email && { email } : {}),
 					username,
-					statusText,
-					statusType,
 					nickname,
 					bio,
 				},
