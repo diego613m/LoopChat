@@ -1,20 +1,32 @@
+import type { IRoom } from '../definition/rooms';
 import type { IUIKitResponse } from '../definition/uikit/IUIKitInteractionType';
-import type { IUIKitActionButtonIncomingInteraction } from '../definition/uikit/UIKitIncomingInteractionTypes';
-import type { IUIKitActionButtonMediaCallWidgetIncomingInteraction } from '../definition/uikit/UIKitInteractionContext';
+import type { IUIKitBaseIncomingInteraction } from '../definition/uikit/UIKitIncomingInteractionTypes';
+import type {
+	UIKitMediaCallWidgetActionButtonInteractionContext,
+	UIKitActionButtonInteractionContext,
+} from '../definition/uikit/UIKitInteractionContext';
+import type { IUIKitMediaCallWidgetInteractionResponder } from '../definition/uikit/UIKitInteractionResponder';
 import '../definition/ui/IUIActionButtonDescriptor';
 import '../definition/uikit/UIKitInteractionResponder';
 import '../definition/uikit/UIKitInteractionContext';
 
-export declare function isMediaCallWidgetIncomingInteraction(
-	interaction: IUIKitActionButtonIncomingInteraction,
-): interaction is IUIKitActionButtonMediaCallWidgetIncomingInteraction;
+export declare function makeMediaCallWidgetInteractionContext(
+	interaction: UIKitActionButtonInteractionContext,
+): UIKitMediaCallWidgetActionButtonInteractionContext;
+
+declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionContext' {
+	export class UIKitMediaCallWidgetActionButtonInteractionContext {
+		getInteractionData(): IUIKitActionButtonMediaCallWidgetIncomingInteraction;
+
+		getInteractionResponder(): IUIKitMediaCallWidgetInteractionResponder;
+	}
+}
 
 declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionResponder' {
 	/**
 	 * @experimental
 	 *
 	 * Fields that can be selectively updated on the action button that triggered the interaction.
-	 * At least one field must be provided.
 	 */
 	export type IUIKitActionButtonUpdateParam = {
 		/** Replaces the action ID registered for this button. */
@@ -32,15 +44,13 @@ declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionRespon
 		update: IUIKitActionButtonUpdateParam;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/naming-convention -- We need the correct name to augment
-	interface UIKitInteractionResponder {
+	export interface IUIKitMediaCallWidgetInteractionResponder extends UIKitInteractionResponder {
 		/**
 		 * @experimental
 		 *
 		 * Signals to the UI that the action button which triggered this interaction
 		 * should have its properties updated in place. Any combination of the optional
-		 * fields (`actionId`, `labelI18n`, `variant`, `disabled`) may be provided; at least one
-		 * must be present (enforced by the parameter type).
+		 * fields (`actionId`, `labelI18n`, `variant`, `disabled`) may be provided
 		 */
 		updateActionButtonResponse(update: IUIKitActionButtonUpdateParam): IUIKitActionButtonUpdateResponse;
 	}
@@ -84,7 +94,11 @@ declare module '@rocket.chat/apps-engine/definition/ui/IUIActionButtonDescriptor
 }
 
 declare module '@rocket.chat/apps-engine/definition/uikit/UIKitInteractionContext' {
-	export interface IUIKitActionButtonMediaCallWidgetIncomingInteraction extends IUIKitActionButtonIncomingInteraction {
+	export interface IUIKitActionButtonMediaCallWidgetIncomingInteraction extends IUIKitBaseIncomingInteraction {
+		buttonContext: 'mediaCallWidgetAction';
+		actionId: string;
+		triggerId: string;
+		room?: IRoom;
 		callId: string;
 	}
 }

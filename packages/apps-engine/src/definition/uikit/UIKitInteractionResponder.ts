@@ -90,7 +90,12 @@ export class UIKitInteractionResponderImpl implements UIKitInteractionResponder 
 	 */
 
 	// This method isn't part of the base public interface, an augmentation interface is used to expose it as experimental
-	public updateActionButtonResponse(update: { actionId?: string; labelI18n?: string; variant?: 'danger'; disabled?: boolean }): {
+	public updateActionButtonResponse(update: {
+		actionId?: string;
+		labelI18n?: string;
+		variant?: 'default' | 'danger';
+		disabled?: boolean;
+	}): {
 		appId: string;
 		actionId: string;
 		triggerId: string;
@@ -98,7 +103,7 @@ export class UIKitInteractionResponderImpl implements UIKitInteractionResponder 
 		update: {
 			actionId?: string;
 			labelI18n?: string;
-			variant?: 'danger';
+			variant?: 'default' | 'danger';
 			disabled?: boolean;
 		};
 	} {
