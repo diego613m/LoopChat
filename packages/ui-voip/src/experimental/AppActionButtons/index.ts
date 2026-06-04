@@ -5,5 +5,5 @@ export type {
 	AppButtonInteractionHandler,
 	MediaCallAppActionDescriptor,
 	MediaCallAppActionsContextValue,
-	MediaCallWidgetState as MediaCallState,
+	MediaCallWidgetState,
 } from './context/MediaCallAppActionsContext';

@@ -82,13 +82,13 @@ const stateAwareActions: MediaCallAppActionDescriptor[] = [
 const handleInteraction: AppButtonInteractionHandler = async ({ button, sessionState }) => {
 	switch (button.actionId) {
 		case 'always-visible':
-			return { update: { label: `Clicked in state ${sessionState.callId}`, actionId: 'default' } };
+			return { update: { label: `Clicked with call id ${sessionState.callId}`, actionId: 'default' } };
 		case 'new-only':
 		case 'ringing-states':
 		case 'calling-states':
 		case 'ongoing-only':
 		case 'danger-action':
-			return { update: { label: `Clicked in state ${sessionState.callId} (filtered)` } };
+			return { update: { label: `Clicked with call id ${sessionState.callId} (filtered)` } };
 		default:
 			return undefined;
 	}
@@ -146,8 +146,6 @@ const meta = {
 	decorators: [
 		mockedContexts,
 		(Story, { args }) => (
-			// key forces a full remount whenever the initial-state arg changes,
-			// so the widget always starts fresh from the selected state.
 			<MockedMediaCallAppActionsProvider actions={stateAwareActions} handleInteraction={handleInteraction}>
 				<MockedMediaCallProvider state={args.state} transferredBy={args.transferredBy}>
 					<Story />

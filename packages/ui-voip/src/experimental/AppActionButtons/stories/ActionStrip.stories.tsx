@@ -21,12 +21,16 @@ export default {
 				Resume: 'Resume',
 				Show_chat: 'Show chat',
 				Hide_chat: 'Hide chat',
+				Screen_sharing: 'Screen sharing',
+				Screen_sharing_off: 'Screen sharing off',
+				Forward: 'Forward',
+				Voice_call__user__hangup: 'Hang up {{user}}',
 			})
 			.buildStoryDecorator(),
-		(Story, { args }) => (
+		(Story) => (
 			<MockedMediaCallAppActionsProvider>
 				<MockedMediaCallProvider state='ongoing'>
-					<Story {...args} />
+					<Story />
 				</MockedMediaCallProvider>
 			</MockedMediaCallAppActionsProvider>
 		),
