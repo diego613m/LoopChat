@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl https://install.meteor.com/ | sh
 
 # Copy Deno binary (needed for builder stage during yarn build)
-COPY --from=denoland/deno:bin-1.37.1 /deno /bin/deno
+COPY --from=denoland/deno:bin-2.3.1 /deno /bin/deno
 
 # Set up working directory
 WORKDIR /app
@@ -60,7 +60,7 @@ RUN groupadd -g 65533 -r rocketchat \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Deno binary from official image (needed for some integrations/script execution)
-COPY --from=denoland/deno:bin-1.37.1 /deno /bin/deno
+COPY --from=denoland/deno:bin-2.3.1 /deno /bin/deno
 
 # Copy the compiled Meteor bundle from Stage 1
 COPY --from=builder --chown=rocketchat:rocketchat /app/dist/bundle /app/bundle
