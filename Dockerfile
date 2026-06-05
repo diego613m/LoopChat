@@ -56,7 +56,7 @@ RUN groupadd -g 65533 -r rocketchat \
     && mkdir -p /app/uploads \
     && chown rocketchat:rocketchat /app/uploads \
     && apt-get update \
-    && apt-get install -y --no-install-recommends fontconfig ca-certificates \
+    && apt-get install -y --no-install-recommends fontconfig ca-certificates g++ make python3 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy Deno binary from official image (needed for some integrations/script execution)
