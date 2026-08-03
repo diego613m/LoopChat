@@ -99,7 +99,7 @@ check_file() {
 
     # C5/C9: .input() sin tipo SQL explícito (patrón mssql — solo aplica a código propio SIATC)
     local sql_hit
-    sql_hit=$(grep -nP "\.input\(['\"][^'\"]+['\"]\s*,\s*(?!sql\.)" "$f" 2>/dev/null | grep -v "^\s*//" || true)
+    sql_hit=$(grep -nP "\.input\(['\"][^'\"]+['\"]\s*+,\s*+(?!sql\.)" "$f" 2>/dev/null | grep -v "^\s*//" || true)
     if [ -n "$sql_hit" ]; then
         echo -e "${YELLOW}[C9-ADVERTENCIA]${NC} .input() sin tipo SQL explícito → $f"
         echo "$sql_hit" | sed 's/^/     /'
