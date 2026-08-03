@@ -26,6 +26,7 @@ import './publications';
 import '../lib/oauthRedirectUriServer';
 import './lib/pushConfig';
 import './features/EmailInbox/index';
+import './siatc'; // Fase 2 del plan de migración al Ecosistema SIATC — hooks de aprobación SSO
 
 await Promise.all([configureServer(settings), registerServices(), startup()]);
 
