@@ -164,9 +164,17 @@ else
 fi
 
 # ─── Typecheck (Meteor + TypeScript, sin build completo) ────────────────────
+# El script "typecheck" de apps/meteor corre "meteor lint && tsc --noEmit" — Meteor
+# es un binario aparte (se instala con "curl https://install.meteor.com/ | sh" en el
+# Dockerfile real), no una dependencia de npm/yarn. Si no está instalado en esta
+# máquina (dev local sin el CLI de Meteor), se degrada a advertencia — el build real
+# en Dokploy sí lo tiene, así que ahí el chequeo corre completo igual.
 echo -e "\n📐 Verificando TypeScript (apps/meteor)..."
 if [ ! -d "node_modules" ]; then
     echo -e "${YELLOW}  ⚠ Dependencias no instaladas (node_modules ausente) — ejecuta 'yarn install' primero. Omitiendo typecheck.${NC}"
+    WARNINGS=$((WARNINGS+1))
+elif ! command -v meteor > /dev/null 2>&1; then
+    echo -e "${YELLOW}  ⚠ CLI de Meteor no instalado en esta máquina (dev local) — omitiendo typecheck. El build real en Dokploy sí lo corre.${NC}"
     WARNINGS=$((WARNINGS+1))
 else
     TYPECHECK_OUT=$(cd apps/meteor && yarn typecheck 2>&1)
@@ -180,16 +188,22 @@ else
     fi
 fi
 
-# ─── Lint (turbo run lint, todo el monorepo) ─────────────────────────────────
-echo -e "\n🧹 Verificando lint..."
+# ─── Lint (acotado a apps/meteor/server/siatc — nuestro código, no el fork completo) ─
+# "yarn lint" (turbo run lint) corre sobre las 70+ paquetes vendored de Rocket.Chat —
+# ahí aparecen hallazgos preexistentes del fork que no escribimos y no podemos arreglar
+# sin desviarnos del alcance de este chequeo (mismo criterio que los controles de
+# patrones SQL más arriba, escaneados solo en $SIATC_CODE_DIR).
+echo -e "\n🧹 Verificando lint (apps/meteor/${SIATC_CODE_DIR#apps/meteor/})..."
 if [ ! -d "node_modules" ]; then
     echo -e "${YELLOW}  ⚠ Dependencias no instaladas — omitiendo lint${NC}"
     WARNINGS=$((WARNINGS+1))
+elif [ ! -d "$SIATC_CODE_DIR" ]; then
+    echo -e "${CYAN}  ℹ ${SIATC_CODE_DIR}/ todavía no existe — sin código propio que lintear${NC}"
 else
-    LINT_OUT=$(yarn lint 2>&1)
+    LINT_OUT=$(cd apps/meteor && yarn eslint "server/siatc" 2>&1)
     LINT_EXIT=$?
     if [ $LINT_EXIT -ne 0 ]; then
-        echo -e "${RED}[C6-CRÍTICO]${NC} 'yarn lint' reportó errores"
+        echo -e "${RED}[C6-CRÍTICO]${NC} ESLint reportó errores en ${SIATC_CODE_DIR}/"
         echo "$LINT_OUT" | tail -40 | sed 's/^/     /'
         ERRORS=$((ERRORS+1))
     else
