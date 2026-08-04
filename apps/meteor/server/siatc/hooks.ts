@@ -38,6 +38,14 @@ beforeCreateUserCallback.add(
 		options: { profile?: { name?: string } },
 		user: { services?: Record<string, { email?: string; name?: string; username?: string }> },
 	) => {
+		// Primer usuario del workspace (setup-wizard) — mismo criterio nativo de
+		// Rocket.Chat, que siempre deja pasar al primer usuario como admin. Sin esto,
+		// nuestra propia cola de aprobación bloquearía la creación de la primera
+		// cuenta admin de una instancia recién levantada, porque todavía no existe
+		// ninguna fila en EBM.Users para aprobarla.
+		const existingUserCount = await Meteor.users.find({}, { fields: { _id: 1 } }).countAsync();
+		if (existingUserCount === 0) return options;
+
 		const email = extractEmailFromServices(user)?.trim().toLowerCase();
 
 		// Sin email no hay forma de verificar contra EBM.Users — no es un caso de
