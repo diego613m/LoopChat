@@ -4,8 +4,8 @@ import sql from 'mssql';
 // EBM.PendingSSORequests) — mismo patrón que server/db.ts de las 10 apps
 // (Etapa 6: usuarios de privilegio mínimo siatc_reader/siatc_writer).
 const baseSqlConfig = {
-	database: process.env.SIATC_DB_DATABASE,
-	server: process.env.SIATC_DB_SERVER || '',
+	database: process.env.DB_DATABASE,
+	server: process.env.DB_SERVER || '',
 	pool: {
 		max: 10,
 		min: 0,
@@ -20,13 +20,13 @@ const baseSqlConfig = {
 
 const readSqlConfig = {
 	...baseSqlConfig,
-	user: process.env.SIATC_DB_USER_READ,
-	password: process.env.SIATC_DB_PASS_READ,
+	user: process.env.DB_USER_READ,
+	password: process.env.DB_PASS_READ,
 };
 const writeSqlConfig = {
 	...baseSqlConfig,
-	user: process.env.SIATC_DB_USER_WRITE,
-	password: process.env.SIATC_DB_PASS_WRITE,
+	user: process.env.DB_USER_WRITE,
+	password: process.env.DB_PASS_WRITE,
 };
 
 let readPoolPromise: Promise<sql.ConnectionPool> | null = null;
