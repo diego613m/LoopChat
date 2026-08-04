@@ -109,6 +109,8 @@ export const createOAuthTotpLoginMethod =
 Accounts.oauth.credentialRequestCompleteHandler = credentialRequestCompleteHandler;
 
 getDdpSdk().account.onPageLoadLogin(async (loginAttempt: any) => {
+	console.log('[SIATC DEBUG] onPageLoadLogin fired', loginAttempt);
+
 	if (loginAttempt?.error && SIATC_LOGIN_ERRORS.includes(loginAttempt.error.error)) {
 		dispatchToastMessage({ type: 'error', message: loginAttempt.error });
 		return;
