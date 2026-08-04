@@ -6,6 +6,13 @@ import { LoginCancelledError } from './LoginCancelledError';
 import type { IOAuthProvider } from '../../definitions/IOAuthProvider';
 import type { LoginCallback } from '../../lib/2fa/overrideLoginMethod';
 import { getDdpSdk } from '../../lib/sdk/ddpSdk';
+import { dispatchToastMessage } from '../../lib/toast';
+
+// Errores lanzados por server/siatc/hooks.ts (cola de aprobación SIATC) cuando un
+// login por OAuth (Casdoor) se completa vía redirect — ese flujo termina en un
+// page-load automático de Meteor (onPageLoadLogin más abajo), no en la promesa que
+// devuelve el botón de login, así que sin esto el usuario no ve ningún mensaje.
+const SIATC_LOGIN_ERRORS = ['siatc-account-pending', 'siatc-account-inactive', 'siatc-account-rejected'];
 
 const isLoginCancelledError = (error: unknown): error is Meteor.Error =>
 	error instanceof Meteor.Error && error.error === LoginCancelledError.numericError;
@@ -102,6 +109,11 @@ export const createOAuthTotpLoginMethod =
 Accounts.oauth.credentialRequestCompleteHandler = credentialRequestCompleteHandler;
 
 getDdpSdk().account.onPageLoadLogin(async (loginAttempt: any) => {
+	if (loginAttempt?.error && SIATC_LOGIN_ERRORS.includes(loginAttempt.error.error)) {
+		dispatchToastMessage({ type: 'error', message: loginAttempt.error });
+		return;
+	}
+
 	if (loginAttempt?.error?.error !== 'totp-required') {
 		return;
 	}
