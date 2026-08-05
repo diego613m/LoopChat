@@ -19,9 +19,28 @@ const emitter = new Emitter<{
 	notify: ToastMessagePayload;
 }>();
 
+// SIATC: buffer messages dispatched before ToastMessagesProvider subscribes — un
+// login OAuth por redirect (server/siatc/hooks.ts) puede disparar un toast de error
+// muy temprano en el arranque de la página, antes de que el provider se monte; sin
+// esto el mensaje se emite al vacío (ningún listener todavía) y se pierde para
+// siempre, sin ningún error visible. Se entrega al primer subscriber que se registre.
+let hasSubscriber = false;
+let bufferedMessages: ToastMessagePayload[] = [];
+
 export const dispatchToastMessage = (payload: ToastMessagePayload): void => {
-	// TODO: buffer it if there is no subscriber
+	if (!hasSubscriber) {
+		bufferedMessages.push(payload);
+		return;
+	}
 	emitter.emit('notify', payload);
 };
 
-export const subscribeToToastMessages = (callback: (payload: ToastMessagePayload) => void): (() => void) => emitter.on('notify', callback);
+export const subscribeToToastMessages = (callback: (payload: ToastMessagePayload) => void): (() => void) => {
+	hasSubscriber = true;
+	if (bufferedMessages.length) {
+		const buffered = bufferedMessages;
+		bufferedMessages = [];
+		buffered.forEach(callback);
+	}
+	return emitter.on('notify', callback);
+};
