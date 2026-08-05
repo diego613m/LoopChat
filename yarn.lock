@@ -975,10 +975,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@azure/msal-common@npm:15.17.0":
+  version: 15.17.0
+  resolution: "@azure/msal-common@npm:15.17.0"
+  checksum: 10/ca0c040a236744f0d648ab1444b0eed6406b41311b4271feaefb7f845a198d3fc8d182b0c5297790ba8ce1341a9928f8832d2f05c86a37e85cb444e5d66dee5e
+  languageName: node
+  linkType: hard
+
 "@azure/msal-common@npm:16.11.3":
   version: 16.11.3
   resolution: "@azure/msal-common@npm:16.11.3"
   checksum: 10/ff1b02b08c5141d6f5ba768ef00a6fc92a8e714b97cbea5ec741108e59f2b08c4746c664cd77fe1925f4a39f861f502ad38155d8dbbff219966ee333714f5ec5
+  languageName: node
+  linkType: hard
+
+"@azure/msal-node@npm:^3":
+  version: 3.8.10
+  resolution: "@azure/msal-node@npm:3.8.10"
+  dependencies:
+    "@azure/msal-common": "npm:15.17.0"
+    jsonwebtoken: "npm:^9.0.0"
+    uuid: "npm:^8.3.0"
+  checksum: 10/bdd9746c25f288af5eca8ff2703ebd7265607b26d6e7605f64c45e58e5cdef61a095d706403cb8e651f83fcb0326d345fff0968081f4b802f70350d4cf7f939e
   languageName: node
   linkType: hard
 
@@ -10116,6 +10134,7 @@ __metadata:
     "@aws-sdk/lib-storage": "npm:^3.862.0"
     "@aws-sdk/s3-request-presigner": "npm:^3.862.0"
     "@axe-core/playwright": "npm:^4.10.2"
+    "@azure/msal-node": "npm:^3"
     "@babel/core": "npm:~7.29.0"
     "@babel/preset-env": "npm:~7.29.5"
     "@babel/preset-react": "npm:~7.27.1"
@@ -37301,7 +37320,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^8.0.0, uuid@npm:^8.3.2":
+"uuid@npm:^8.0.0, uuid@npm:^8.3.0, uuid@npm:^8.3.2":
   version: 8.3.2
   resolution: "uuid@npm:8.3.2"
   bin:
