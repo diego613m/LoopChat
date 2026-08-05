@@ -69,6 +69,7 @@
 		"@aws-sdk/client-s3": "^3.862.0",
 		"@aws-sdk/lib-storage": "^3.862.0",
 		"@aws-sdk/s3-request-presigner": "^3.862.0",
+		"@azure/msal-node": "^3",
 		"@babel/core": "~7.29.6",
 		"@babel/preset-env": "~7.29.5",
 		"@babel/runtime": "~7.29.2",
