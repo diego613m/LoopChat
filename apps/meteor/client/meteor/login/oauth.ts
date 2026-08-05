@@ -14,6 +14,26 @@ import { dispatchToastMessage } from '../../lib/toast';
 // devuelve el botón de login, así que sin esto el usuario no ve ningún mensaje.
 const SIATC_LOGIN_ERRORS = ['siatc-account-pending', 'siatc-account-inactive', 'siatc-account-rejected'];
 
+// En el flujo de login por redirect (Login Style: Redirect), el login se completa vía
+// el endpoint REST callAnon/login, no por DDP en vivo — por eso loginAttempt acá NO
+// trae un `.error` directo como en un login DDP normal, sino `{message: '<JSON en
+// texto>', success: false}` (la respuesta cruda de ese endpoint). Hay que parsear
+// `message` para llegar al error real. Confirmado inspeccionando loginAttempt en vivo
+// (ver bitácora del commit 60e057ad) antes de asumir la forma "estándar".
+const extractLoginError = (loginAttempt: any): { error?: string; reason?: string } | undefined => {
+	if (loginAttempt?.error) {
+		return loginAttempt.error;
+	}
+	if (typeof loginAttempt?.message === 'string') {
+		try {
+			return JSON.parse(loginAttempt.message)?.error;
+		} catch {
+			return undefined;
+		}
+	}
+	return undefined;
+};
+
 const isLoginCancelledError = (error: unknown): error is Meteor.Error =>
 	error instanceof Meteor.Error && error.error === LoginCancelledError.numericError;
 
@@ -109,10 +129,9 @@ export const createOAuthTotpLoginMethod =
 Accounts.oauth.credentialRequestCompleteHandler = credentialRequestCompleteHandler;
 
 getDdpSdk().account.onPageLoadLogin(async (loginAttempt: any) => {
-	console.log('[SIATC DEBUG] onPageLoadLogin fired', loginAttempt);
-
-	if (loginAttempt?.error && SIATC_LOGIN_ERRORS.includes(loginAttempt.error.error)) {
-		dispatchToastMessage({ type: 'error', message: loginAttempt.error });
+	const siatcError = extractLoginError(loginAttempt);
+	if (siatcError && SIATC_LOGIN_ERRORS.includes(siatcError.error)) {
+		dispatchToastMessage({ type: 'error', message: siatcError });
 		return;
 	}
 
