@@ -50,20 +50,28 @@ export async function checkApprovalStatus(email: string): Promise<ApprovalStatus
 }
 
 /**
- * Crea la solicitud de aprobación en la cola compartida de Console. No duplica
- * si ya existe una fila 'pending'/'rejected' para este email — eso lo decide
- * checkApprovalStatus() antes de llamar acá (solo se invoca cuando reason === 'none').
+ * Crea la solicitud de aprobación en la cola compartida de Console. checkApprovalStatus()
+ * decide si hace falta llamar acá (solo cuando reason === 'none'), pero ese chequeo no es
+ * atómico con este INSERT -- dos requests casi simultáneas (doble click, doble pestaña)
+ * pueden pasar el chequeo antes de que cualquiera inserte. El índice único filtrado
+ * UX_PendingSSORequests_Email_Pending (Email, WHERE Status='pending') rechaza la segunda
+ * con "duplicate key"; se trata como éxito (alguien más ya ganó la carrera), no como error.
  */
 export async function createPendingRequest(email: string, fullName: string, casdoorUserId: string): Promise<void> {
 	const pool = await getWritePool();
-	await pool
-		.request()
-		.input('email', sql.VarChar(255), email)
-		.input('fullName', sql.VarChar(200), fullName || null)
-		.input('provider', sql.VarChar(50), 'sso')
-		.input('casdoorUserId', sql.VarChar(100), casdoorUserId || '')
-		.input('appCode', sql.VarChar(20), APP_CODE).query(`
-            INSERT INTO EBM.PendingSSORequests (Email, FullName, Provider, CasdoorUserId, AppCode)
-            VALUES (@email, @fullName, @provider, @casdoorUserId, @appCode)
-        `);
+	try {
+		await pool
+			.request()
+			.input('email', sql.VarChar(255), email)
+			.input('fullName', sql.VarChar(200), fullName || null)
+			.input('provider', sql.VarChar(50), 'sso')
+			.input('casdoorUserId', sql.VarChar(100), casdoorUserId || '')
+			.input('appCode', sql.VarChar(20), APP_CODE).query(`
+	            INSERT INTO EBM.PendingSSORequests (Email, FullName, Provider, CasdoorUserId, AppCode)
+	            VALUES (@email, @fullName, @provider, @casdoorUserId, @appCode)
+	        `);
+	} catch (err: unknown) {
+		const msg = (err as Error)?.message || '';
+		if (!msg.includes('duplicate key')) throw err;
+	}
 }
