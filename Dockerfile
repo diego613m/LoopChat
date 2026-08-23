@@ -38,7 +38,16 @@ COPY . .
 RUN yarn install
 
 # Build all package workspaces via Turborepo
-RUN yarn build
+#
+# ⚠️ El limite de memoria y la concurrencia no son cosmeticos: sin ellos el build
+# se cae. Turborepo lanza tantos `tsc` como nucleos tenga la maquina, cada uno con
+# su propio monton de memoria, y en un servidor modesto el kernel mata alguno a
+# medias. El sintoma engaña: falla un paquete cualquiera —la primera vez fue
+# `@rocket.chat/sha256`, que son seis ficheros diminutos— y parece un error de
+# codigo. La pista de que es memoria es que el log termina en `Node.js v22.x`,
+# que es el pie de un proceso MUERTO, no un `error TS...` de TypeScript.
+ENV NODE_OPTIONS=--max-old-space-size=4096
+RUN yarn build --concurrency=2
 
 # Build the main Meteor application bundle
 RUN cd apps/meteor && meteor build --server-only --directory /app/dist
