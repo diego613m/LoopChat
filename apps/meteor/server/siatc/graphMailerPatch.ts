@@ -21,14 +21,20 @@ const toAddressList = (to: unknown): string => {
 	return (to as { address?: string })?.address || '';
 };
 
-Email.sendAsync = async function siatcSendAsync(options: { to?: unknown; subject?: string; html?: string; text?: string }) {
-	const to = toAddressList(options?.to);
-	const html = options?.html || (options?.text ? `<pre>${options.text}</pre>` : '');
+// El tipo del parametro se toma de la propia funcion que envolvemos en vez de escribirlo a mano:
+// asi la firma encaja siempre, aunque Rocket.Chat la cambie en una version futura. Escribirla a
+// mano fue justo lo que se rompio al pasar de 8.6.0-develop a 8.7.1.
+type OpcionesCorreo = Parameters<typeof originalSendAsync>[0];
 
-	if (to && options?.subject && html) {
-		const sentViaGraph = await sendMailViaGraph(to, options.subject, html);
+Email.sendAsync = async function siatcSendAsync(options: OpcionesCorreo) {
+	const campos = options as { to?: unknown; subject?: string; html?: string; text?: string };
+	const to = toAddressList(campos?.to);
+	const html = campos?.html || (campos?.text ? `<pre>${campos.text}</pre>` : '');
+
+	if (to && campos?.subject && html) {
+		const sentViaGraph = await sendMailViaGraph(to, campos.subject, html);
 		if (sentViaGraph) return;
 	}
 
-	return originalSendAsync.call(this, options as Parameters<typeof originalSendAsync>[0]);
+	return originalSendAsync.call(this, options);
 };

@@ -130,7 +130,7 @@ Accounts.oauth.credentialRequestCompleteHandler = credentialRequestCompleteHandl
 
 getDdpSdk().account.onPageLoadLogin(async (loginAttempt: any) => {
 	const siatcError = extractLoginError(loginAttempt);
-	if (siatcError && SIATC_LOGIN_ERRORS.includes(siatcError.error)) {
+	if (siatcError?.error && SIATC_LOGIN_ERRORS.includes(siatcError.error)) {
 		dispatchToastMessage({ type: 'error', message: siatcError });
 		return;
 	}
